@@ -1,9 +1,15 @@
 extern crate bindgen;
 #[cfg(feature = "static")]
 extern crate cmake;
+extern crate gl_generator;
+
+use gl_generator::{Registry, Api, Profile, Fallbacks, StaticGenerator};
+use std::env;
+use std::fs::File;
+use std::path::Path;
 
 static LIBRARIES: &'static [&'static str] =
-    &["wlr-common", "wlr-wayland", "wlr-backend", "wlr-session", "wlr-types"];
+    &["wlr-common", "wlr-backend", "wlr-session", "wlr-types"];
 
 fn main() {
     let generated = bindgen::builder()
@@ -36,6 +42,16 @@ fn main() {
     generated.write_to_file("src/gen.rs").unwrap();
 
     cmake();
+
+    // Example Khronos building stuff.
+    // TODO Put behind feature flag.
+    let dest = env::var("OUT_DIR").unwrap();
+    let mut file = File::create(&Path::new(&dest).join("bindings.rs")).unwrap();
+
+    Registry::new(Api::Gl, (4, 5), Profile::Core, Fallbacks::All, [])
+        .write_bindings(StaticGenerator, &mut file)
+        .unwrap();
+
 }
 
 #[cfg(not(feature = "static"))]

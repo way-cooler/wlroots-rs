@@ -14,9 +14,12 @@ build = "build.rs"
 bindgen = "^0.23.1"
 cmake = { version = "^0.1.22", optional = true }
 
+# This is for the example
+gl_generator = "0.5.0"
+
 [dependencies]
 libc = "^0.2.21"
-wayland-sys = { version = "0.9.*", features = ["client", "dlopen"] }
+wayland-sys = { version = "0.9.*", features = ["client", "dlopen", "server"] }
 wayland-server = { version = "0.9.*" }
 
 [features]
