@@ -113,9 +113,6 @@ unsafe extern "C" fn output_add(listener: *mut wl_listener, data: *mut c_void) {
     println!("Adding output");
     let cur_mode = (*(*output.modes).items) as *mut _;
     wlr_output_set_mode(output, cur_mode);
-    // TODO FIXME
-    // This will be moved, and we have throw pointers willy nilly to it.
-    // Might need to box and forget.
     let new_output_state = OutputState {
         output,
         state,
@@ -195,7 +192,6 @@ fn main() {
             panic!("Failed to initialize wlr output backend");
         }
 
-        // NOTE Super unsafe, raw pointer will be pointing at this stack data.
         let mut done = false;
         let timer = ffi_dispatch!(WAYLAND_SERVER_HANDLE,
                                   wl_event_loop_add_timer,
@@ -226,8 +222,6 @@ fn main() {
                       wl_event_source_timer_update,
                       timer_enable_outputs,
                       10000);
-        /// NOTE Might be undefined behaviour, as this is changed
-        /// through a `*mut c_void` pointer...
         while !done {
             ffi_dispatch!(WAYLAND_SERVER_HANDLE,
                           wl_event_loop_dispatch,
