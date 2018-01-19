@@ -14,17 +14,6 @@ macro_rules! container_of (
     }
 );
 
-/// Convert a literal string to a C string.
-/// Note: Does not check for internal nulls, nor does it do any conversions on
-/// the grapheme clustors. Just passes the bytes as is.
-/// So probably only works on ASCII.
-#[macro_export]
-macro_rules! c_str {
-    ($s:expr) => {
-        concat!($s, "\0").as_ptr() as *const i8
-    }
-}
-
 /// Logs a message using wlroots' logging capability.
 ///
 /// Possible values for `verb`:
@@ -43,8 +32,8 @@ macro_rules! wlr_log {
             let fmt = CString::new(format!($($msg)*))
                 .expect("Could not convert log message to C string");
             let raw = fmt.into_raw();
-            _wlr_log($verb, c_str!("[%s:%lu] %s"),
-                    c_str!(file!()), line!(), raw);
+            _wlr_log($verb, concat!("[%s:%lu] %s", "\0").as_ptr() as *const i8,
+                    concat!(file!(), "\0").as_ptr() as *const i8, line!(), raw);
             // Deallocate string
             CString::from_raw(raw);
         }
