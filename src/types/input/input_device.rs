@@ -1,4 +1,4 @@
-use libc::{c_double, c_int};
+use libc::{c_double, c_uint};
 
 use wlroots_sys::{wlr_input_device, wlr_input_device_pointer, wlr_input_device_type};
 
@@ -24,11 +24,11 @@ impl InputDevice {
         InputDevice { device: self.device }
     }
 
-    pub fn vendor(&self) -> c_int {
+    pub fn vendor(&self) -> c_uint {
         unsafe { (*self.device).vendor }
     }
 
-    pub fn product(&self) -> c_int {
+    pub fn product(&self) -> c_uint {
         unsafe { (*self.device).product }
     }
 
