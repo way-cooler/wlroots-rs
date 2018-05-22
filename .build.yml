@@ -21,6 +21,8 @@ sources:
 tasks:
   - setup: |
       rustup install stable
+      rustup default stable
+      rustup component add rustfmt-preview
       export CC=clang
       rustup default stable
       export RUST_BACKTRACE=full
@@ -42,3 +44,4 @@ tasks:
       cargo build --examples
       cargo doc
       cargo test --all
+      cargo fmt -- --write-mode diff

@@ -13,7 +13,7 @@ use wlroots::{project_box, Area, Capability, CompositorBuilder, CompositorHandle
               XCursorManager, XdgV6ShellHandler, XdgV6ShellManagerHandler, XdgV6ShellState,
               XdgV6ShellSurfaceHandle};
 use wlroots::key_events::KeyEvent;
-use wlroots::pointer_events::{ButtonEvent, MotionEvent, AbsoluteMotionEvent};
+use wlroots::pointer_events::{AbsoluteMotionEvent, ButtonEvent, MotionEvent};
 use wlroots::utils::{init_logging, L_DEBUG};
 use wlroots::wlroots_sys::wlr_key_state::WLR_KEY_PRESSED;
 use wlroots::xkbcommon::xkb::keysyms::{KEY_Escape, KEY_F1};
@@ -28,7 +28,10 @@ struct State {
 }
 
 impl State {
-    fn new(xcursor_manager: XCursorManager, layout: OutputLayoutHandle, cursor: CursorHandle) -> Self {
+    fn new(xcursor_manager: XCursorManager,
+           layout: OutputLayoutHandle,
+           cursor: CursorHandle)
+           -> Self {
         State { xcursor_manager,
                 layout,
                 cursor,
@@ -153,7 +156,10 @@ impl KeyboardHandler for ExKeyboardHandler {
 }
 
 impl PointerHandler for ExPointer {
-    fn on_motion_absolute(&mut self, compositor: CompositorHandle, _: PointerHandle, event: &AbsoluteMotionEvent) {
+    fn on_motion_absolute(&mut self,
+                          compositor: CompositorHandle,
+                          _: PointerHandle,
+                          event: &AbsoluteMotionEvent) {
         with_handles!([(compositor: {compositor})] => {
             let state: &mut State = compositor.into();
             let (x, y) = event.pos();
@@ -243,9 +249,12 @@ impl InputManagerHandler for InputManager {
 fn main() {
     init_logging(L_DEBUG, None);
     let mut cursor = Cursor::create(Box::new(CursorEx));
-    let mut xcursor_manager = XCursorManager::create("default".to_string(), 24).expect("Could not create xcursor manager");
+    let mut xcursor_manager =
+        XCursorManager::create("default".to_string(), 24).expect("Could not create xcursor \
+                                                                  manager");
     xcursor_manager.load(1.0);
-    cursor.run(|c| xcursor_manager.set_cursor_image("left_ptr".to_string(), c)).unwrap();
+    cursor.run(|c| xcursor_manager.set_cursor_image("left_ptr".to_string(), c))
+          .unwrap();
     let layout = OutputLayout::create(Box::new(OutputLayoutEx));
 
     let mut compositor =
