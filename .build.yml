@@ -42,3 +42,4 @@ tasks:
       cargo build --examples
       cargo doc
       cargo test --all
+      cargo fmt -- --write-mode diff
