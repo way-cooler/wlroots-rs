@@ -21,6 +21,7 @@ sources:
 tasks:
   - setup: |
       rustup install stable
+      rustup default stable
       rustup component add rustfmt-preview
       export CC=clang
       rustup default stable
