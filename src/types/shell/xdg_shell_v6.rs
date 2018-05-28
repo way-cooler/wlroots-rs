@@ -195,10 +195,6 @@ impl XdgV6ShellSurface {
     }
 
     /// Creates a weak reference to an `XdgV6ShellSurface`.
-    ///
-    /// # Panics
-    /// If this `XdgV6ShellSurface` is a previously upgraded `XdgV6ShellSurfaceHandle`,
-    /// then this function will panic.
     pub fn weak_reference(&self) -> XdgV6ShellSurfaceHandle {
         XdgV6ShellSurfaceHandle { handle: Rc::downgrade(&self.liveliness),
                                   state: match self.state {
