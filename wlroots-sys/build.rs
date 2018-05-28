@@ -127,7 +127,7 @@ fn meson() {
 }
 
 /// Gets the unstable and stable protocols in /usr/share-wayland-protocols and
-/// generates server headers for them.
+/// in wlroots/protocol.
 ///
 /// The path to the folder with the generated headers is returned. It will
 /// have two directories, `stable`, and `unstable`.
@@ -157,6 +157,26 @@ fn generate_protocol_headers() -> io::Result<PathBuf> {
                                            .unwrap();
         }
     }
+    for entry in fs::read_dir("./wlroots/protocol")? {
+        let entry = entry?;
+        let path = entry.path();
+        let mut filename = entry.file_name().into_string().unwrap();
+        if filename.ends_with(".xml") {
+            let new_length = filename.len() - 4;
+            filename.truncate(new_length);
+        } else {
+            continue
+        }
+        filename.push_str("-protocol");
+        Command::new("wayland-scanner").arg("server-header")
+                                       .arg(path.clone())
+                                       .arg(format!("{}/{}.h",
+                                                    out_path.to_str().unwrap(),
+                                                    filename))
+                                       .status()
+                                       .unwrap();
+    }
+
     Ok(out_path)
 }
 
