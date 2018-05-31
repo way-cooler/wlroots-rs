@@ -36,8 +36,10 @@ pub use self::events::{key_events, seat_events, tablet_pad_events, tablet_tool_e
                        xdg_shell_v6_events, xdg_shell_events};
 pub use self::manager::{InputManagerHandler, KeyboardHandler, OutputBuilder, OutputBuilderResult,
                         OutputHandler, OutputManagerHandler, PointerHandler, TabletPadHandler,
-                        TabletToolHandler, TouchHandler, XdgV6ShellHandler, XdgV6ShellManagerHandler,
-                        XdgShellHandler, XdgShellManagerHandler};
+                        TabletToolHandler, TouchHandler,
+                        XdgV6ShellHandler, XdgV6ShellManagerHandler,
+                        XdgShellHandler, XdgShellManagerHandler,
+                        LayerShellManagerHandler, LayerShellHandler};
 pub use self::types::area::*;
 pub use self::types::cursor::*;
 pub use self::types::data_device::*;

@@ -8,6 +8,8 @@ mod xdg_shell_v6_manager;
 mod xdg_shell_v6_handler;
 mod xdg_shell_manager;
 mod xdg_shell_handler;
+mod layer_shell_manager;
+mod layer_shell_handler;
 mod tablet_pad_handler;
 mod tablet_tool_handler;
 
@@ -24,3 +26,5 @@ pub use self::xdg_shell_v6_handler::*;
 pub use self::xdg_shell_v6_manager::*;
 pub use self::xdg_shell_handler::*;
 pub use self::xdg_shell_manager::*;
+pub use self::layer_shell_handler::*;
+pub use self::layer_shell_manager::*;
