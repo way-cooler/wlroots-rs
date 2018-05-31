@@ -27,11 +27,6 @@ use errors::{HandleErr, HandleResult};
 
 use {SurfaceHandle, OutputHandle};
 
-/// Used to reconstruct `LayerSurfaceHandle`s from raw pointers.
-struct InternalLayerSurfaceState {
-    handle: Weak<Cell<bool>>
-}
-
 #[derive(Debug)]
 pub struct LayerSurface {
     liveliness: Rc<Cell<bool>>,
@@ -117,8 +112,6 @@ impl LayerSurface {
             panic!("Layer surface had a null output")
         }
         let liveliness = Rc::new(Cell::new(false));
-        let state = Box::new(InternalLayerSurfaceState { handle: Rc::downgrade(&liveliness) });
-        (*layer_surface).data = Box::into_raw(state) as *mut _;
         LayerSurface { liveliness,
                        layer_surface }
     }
@@ -282,9 +275,6 @@ impl Drop for LayerSurface {
     fn drop(&mut self) {
         if Rc::strong_count(&self.liveliness) == 1 {
             wlr_log!(L_DEBUG, "Dropped Layer Shell Surface {:p}", self.layer_surface);
-            unsafe {
-                let _ = Box::from_raw((*self.layer_surface).data as *mut InternalLayerSurfaceState);
-            }
             let weak_count = Rc::weak_count(&self.liveliness);
             if weak_count > 0 {
                 wlr_log!(L_DEBUG,
@@ -306,17 +296,6 @@ impl LayerSurfaceHandle {
             LayerSurfaceHandle { handle: Weak::new(),
                                  layer_surface: ptr::null_mut() }
         }
-    }
-
-    /// Creates a LayerSurfaceHandle from the raw pointer, using the saved
-    /// user data to recreate the memory model.
-    pub(crate) unsafe fn from_ptr(layer_surface: *mut wlr_layer_surface) -> Self {
-        let data = (*layer_surface).data as *mut InternalLayerSurfaceState;
-        if data.is_null() {
-            panic!("Layer surface has not been setup properly!");
-        }
-        let handle = (*data).handle.clone();
-        LayerSurfaceHandle { handle, layer_surface }
     }
 
     /// Upgrades the wayland shell handle to a reference to the backing `LayerSurface`.
