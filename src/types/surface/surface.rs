@@ -8,7 +8,7 @@ use wayland_sys::server::signal::wl_signal_add;
 use wlroots_sys::{timespec, wlr_subsurface, wlr_surface, wlr_surface_get_root_surface,
                   wlr_surface_has_buffer, wlr_surface_point_accepts_input, wlr_surface_send_enter,
                   wlr_surface_send_frame_done, wlr_surface_send_leave, wlr_surface_surface_at,
-                  wlr_surface_is_xdg_surface};
+                  wlr_surface_is_layer_surface, wlr_surface_is_xdg_surface};
 
 use super::{Subsurface, SubsurfaceHandle, SubsurfaceHandler, SubsurfaceManager, SurfaceState,
             InternalSubsurface};
@@ -298,6 +298,13 @@ impl Surface {
     /// buffer.
     pub fn surface_to_buffer_matrix(&self) -> [f32; 9] {
         unsafe { (*self.surface).surface_to_buffer_matrix }
+    }
+
+    /// Determines if this surface is a layer surface.
+    pub fn is_layer_surface(&self) -> bool {
+        unsafe {
+            wlr_surface_is_layer_surface(self.surface)
+        }
     }
 
     /// Creates a weak reference to a `Surface`.
