@@ -182,6 +182,10 @@ impl XdgV6ShellSurface {
         }
     }
 
+    /// Call `iterator` on each surface in the xdg-surface tree, with the surface's
+    /// position relative to the root xdg-surface.
+    ///
+    /// The function is called from root to leaves (in rendering order).
     pub fn for_each_surface(&self, mut iterator: &mut FnMut(SurfaceHandle, i32, i32)) {
         unsafe {
             unsafe extern "C" fn c_iterator(wlr_surface: *mut wlr_surface, sx: i32, sy: i32, data: *mut c_void) {
