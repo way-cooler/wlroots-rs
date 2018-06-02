@@ -227,6 +227,9 @@ impl XdgV6ShellSurfaceHandle {
     /// Creates a XdgV6ShellSurfaceHandle from the raw pointer, using the saved
     /// user data to recreate the memory model.
     pub(crate) unsafe fn from_ptr(shell_surface: *mut wlr_xdg_surface_v6) -> Self {
+        if shell_surface.is_null() {
+            panic!("shell surface was null")
+        }
         let data = (*shell_surface).data as *mut XdgV6ShellSurfaceState;
         if data.is_null() {
             panic!("Cannot construct handle from a shell surface that has not been set up!");

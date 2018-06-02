@@ -275,6 +275,9 @@ impl SurfaceHandle {
     /// user data to recreate the memory model.
     pub(crate) unsafe fn from_ptr(surface: *mut wlr_surface) -> Self {
         let data = (*surface).data as *mut InternalSurfaceState;
+        if data.is_null() {
+            panic!("Surface has not been set up");
+        }
         let handle = (*data).handle.clone();
         let subsurfaces_manager = (*data).subsurfaces_manager.clone();
         SurfaceHandle { handle,

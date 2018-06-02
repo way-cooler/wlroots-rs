@@ -30,6 +30,8 @@ pub trait CompositorHandler {
     fn on_shutdown(&mut self) {}
 }
 
+impl CompositorHandler for () {}
+
 wayland_listener!(InternalCompositor, Box<CompositorHandler>, [
     new_surface_listener => new_surface_notify: |this: &mut InternalCompositor,
                                                  surface_ptr: *mut libc::c_void,|
@@ -67,7 +69,6 @@ wayland_listener!(InternalCompositor, Box<CompositorHandler>, [
                                            _data: *mut libc::c_void,|
     unsafe {
         let handler = &mut this.data;
-        assert!(COMPOSITOR_PTR.is_null(), "COMPOSITOR_PTR was not NULL!");
         handler.on_shutdown();
     };
 ]);
@@ -291,7 +292,8 @@ impl CompositorBuilder {
             };
 
             // Set up compositor handler, if the user provided it.
-            let compositor_handler = self.compositor_handler.map(|handler| {
+            let compositor_handler = self.compositor_handler.or_else(|| Some(Box::new(())));
+            let compositor_handler = compositor_handler.map(|handler| {
                 let mut compositor_handler = InternalCompositor::new(handler);
                 wl_signal_add(&mut (*compositor).events.new_surface as *mut _ as _,
                               compositor_handler.new_surface_listener() as *mut _ as _);
