@@ -4,7 +4,7 @@
 use libc;
 use std::{env, panic, ptr, any::Any, cell::{Cell, UnsafeCell}, ffi::CStr, rc::{Rc, Weak}};
 
-use {DataDeviceManager, SurfaceHandle, XWaylandManagerHandler, XWaylandServer};
+use {DataDeviceManager, Surface, SurfaceHandle, XWaylandManagerHandler, XWaylandServer};
 use errors::{HandleErr, HandleResult};
 use extensions::server_decoration::ServerDecorationManager;
 use manager::{InputManager, InputManagerHandler, OutputManager, OutputManagerHandler,
@@ -24,26 +24,51 @@ pub(crate) static mut COMPOSITOR_PTR: *mut Compositor = 0 as *mut _;
 
 pub trait CompositorHandler {
     /// Callback that's triggered when a surface is provided to the compositor.
-    fn new_surface(&mut self, CompositorHandle, &mut SurfaceHandle) {}
+    fn new_surface(&mut self, CompositorHandle, SurfaceHandle) {}
 
     /// Callback that's triggered during shutdown.
     fn on_shutdown(&mut self) {}
 }
 
+impl CompositorHandler for () {}
+
 wayland_listener!(InternalCompositor, Box<CompositorHandler>, [
     new_surface_listener => new_surface_notify: |this: &mut InternalCompositor,
-                                                 surface: *mut libc::c_void,|
+                                                 surface_ptr: *mut libc::c_void,|
     unsafe {
+        let destroy_listener = this.surface_destroy_listener() as *mut _ as _;
         let handler = &mut this.data;
+        let surface_ptr = surface_ptr as _;
         let compositor = (&mut *COMPOSITOR_PTR).weak_reference();
-        let mut surface = SurfaceHandle::from_ptr(surface as _);
-        handler.new_surface(compositor, &mut surface);
+        let surface = Surface::new(surface_ptr);
+        handler.new_surface(compositor.clone(), surface.weak_reference());
+        with_handles!([(compositor: {compositor})] => {
+            compositor.surfaces.push(surface);
+            wl_signal_add(&mut (*surface_ptr).events.destroy as *mut _ as _,
+                          destroy_listener);
+        }).unwrap();
     };
+    surface_destroy_listener => surface_destroy_notify: |_this: &mut InternalCompositor,
+                                                         surface_ptr: *mut libc::c_void,|
+    unsafe {
+        let surface_ptr = surface_ptr as _;
+        let compositor = match compositor_handle() {
+            Some(handle) => handle,
+            None => return
+        };
+        with_handles!([(compositor: {compositor})] => {
+            let find_index = compositor.surfaces.iter().position(|s| s.as_ptr() == surface_ptr);
+            if let Some(index) = find_index {
+                compositor.surfaces.remove(index);
+            }
+        }).unwrap();
+
+    };
+
     shutdown_listener => shutdown_notify: |this: &mut InternalCompositor,
                                            _data: *mut libc::c_void,|
     unsafe {
         let handler = &mut this.data;
-        assert!(COMPOSITOR_PTR.is_null(), "COMPOSITOR_PTR was not NULL!");
         handler.on_shutdown();
     };
 ]);
@@ -101,6 +126,8 @@ pub struct Compositor {
     data_device_manager: Option<DataDeviceManager>,
     /// The error from the panic, if there was one.
     panic_error: Option<Box<Any + Send>>,
+    /// List of surfaces. This is managed by the compositor.
+    surfaces: Vec<Surface>,
     /// Custom function to run at shutdown (or when a panic occurs).
     user_terminate: Option<fn()>,
     /// Lock used to borrow the compositor globally.
@@ -265,7 +292,8 @@ impl CompositorBuilder {
             };
 
             // Set up compositor handler, if the user provided it.
-            let compositor_handler = self.compositor_handler.map(|handler| {
+            let compositor_handler = self.compositor_handler.or_else(|| Some(Box::new(())));
+            let compositor_handler = compositor_handler.map(|handler| {
                 let mut compositor_handler = InternalCompositor::new(handler);
                 wl_signal_add(&mut (*compositor).events.new_surface as *mut _ as _,
                               compositor_handler.new_surface_listener() as *mut _ as _);
@@ -368,6 +396,7 @@ impl CompositorBuilder {
                                           renderer,
                                           xwayland,
                                           user_terminate,
+                                          surfaces: Vec::new(),
                                           panic_error: None,
                                           lock: Rc::new(Cell::new(false)) };
             compositor.set_lock(true);
