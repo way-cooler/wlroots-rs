@@ -6,7 +6,6 @@ use wlroots_sys::wlr_xwayland_surface;
 use libc;
 
 use super::surface::{XWaylandShell, XWaylandSurface, XWaylandSurfaceHandle, XWaylandSurfaceHandler};
-use SurfaceHandle;
 use compositor::{compositor_handle, CompositorHandle};
 
 pub trait XWaylandManagerHandler {
@@ -44,7 +43,6 @@ wayland_listener!(XWaylandManager, (Vec<Box<XWaylandShell>>, Box<XWaylandManager
             Some(handle) => handle,
             None => return
         };
-        let surface = SurfaceHandle::from_ptr((*surface_ptr).surface);
         let shell_surface = XWaylandSurface::new(surface_ptr);
         if let Some(handler) = manager.new_surface(compositor, shell_surface.weak_reference()) {
             let mut shell = XWaylandShell::new((shell_surface, handler));

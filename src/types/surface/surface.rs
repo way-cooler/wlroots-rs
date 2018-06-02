@@ -71,7 +71,7 @@ pub struct SurfaceHandle {
 }
 
 impl Surface {
-    unsafe fn new(surface: *mut wlr_surface) -> Self {
+    pub(crate) unsafe fn new(surface: *mut wlr_surface) -> Self {
         if !(*surface).data.is_null() {
             panic!("Tried to construct a Surface from an already initialized wlr_surface");
         }
