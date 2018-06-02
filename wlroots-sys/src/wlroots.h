@@ -1,6 +1,7 @@
 /// Backend includes
 #include <wlr/backend.h>
 #include <wlr/backend/drm.h>
+#include <wlr/backend/headless.h>
 #include <wlr/backend/interface.h>
 #include <wlr/backend/libinput.h>
 #include <wlr/backend/multi.h>

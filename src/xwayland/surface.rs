@@ -4,7 +4,7 @@ use libc::{self, size_t, int16_t, uint16_t};
 
 use wlroots_sys::{pid_t, wl_event_source, wlr_xwayland_surface, xcb_atom_t, xcb_window_t};
 
-use {Surface, SurfaceHandle, XWaylandSurfaceHints, XWaylandSurfaceSizeHints};
+use {SurfaceHandle, XWaylandSurfaceHints, XWaylandSurfaceSizeHints};
 use compositor::{compositor_handle, CompositorHandle};
 use errors::{HandleErr, HandleResult};
 use events::xwayland_events::{ConfigureEvent, MoveEvent, ResizeEvent};
@@ -59,161 +59,174 @@ pub trait XWaylandSurfaceHandler {
     fn ping_timeout(&mut self, CompositorHandle, SurfaceHandle, XWaylandSurfaceHandle) {}
 }
 
-wayland_listener!(XWaylandShell, (XWaylandSurface, Surface, Box<XWaylandSurfaceHandler>), [
+wayland_listener!(XWaylandShell, (XWaylandSurface, Box<XWaylandSurfaceHandler>), [
     request_configure_listener => request_configure_notify: |this: &mut XWaylandShell,
                                                              data: *mut libc::c_void,|
     unsafe {
-        let (ref shell_surface, ref surface, ref mut manager) = this.data;
+        let (ref mut shell_surface, ref mut manager) = this.data;
+        let surface = shell_surface.surface();
         let compositor = match compositor_handle() {
             Some(handle) => handle,
             None => return
         };
         let event = ConfigureEvent::from_ptr(data as *mut _);
         manager.on_configure(compositor,
-                             surface.weak_reference(),
+                             surface,
                              shell_surface.weak_reference(),
                              &event);
     };
     request_move_listener => request_move_notify: |this: &mut XWaylandShell,
                                                    data: *mut libc::c_void,|
     unsafe {
-        let (ref shell_surface, ref surface, ref mut manager) = this.data;
+        let (ref mut shell_surface, ref mut manager) = this.data;
+        let surface = shell_surface.surface();
         let compositor = match compositor_handle() {
             Some(handle) => handle,
             None => return
         };
         let event = MoveEvent::from_ptr(data as *mut _);
         manager.on_move(compositor,
-                             surface.weak_reference(),
+                             surface,
                              shell_surface.weak_reference(),
                              &event);
     };
     request_resize_listener => request_resize_notify: |this: &mut XWaylandShell,
                                                        data: *mut libc::c_void,|
     unsafe {
-        let (ref shell_surface, ref surface, ref mut manager) = this.data;
+        let (ref mut shell_surface, ref mut manager) = this.data;
+        let surface = shell_surface.surface();
         let compositor = match compositor_handle() {
             Some(handle) => handle,
             None => return
         };
         let event = ResizeEvent::from_ptr(data as *mut _);
         manager.on_resize(compositor,
-                             surface.weak_reference(),
+                             surface,
                              shell_surface.weak_reference(),
                              &event);
     };
     request_maximize_listener => request_maximize_notify: |this: &mut XWaylandShell,
                                                            _data: *mut libc::c_void,|
     unsafe {
-        let (ref shell_surface, ref surface, ref mut manager) = this.data;
+        let (ref mut shell_surface, ref mut manager) = this.data;
+        let surface = shell_surface.surface();
         let compositor = match compositor_handle() {
             Some(handle) => handle,
             None => return
         };
         manager.on_maximize(compositor,
-                             surface.weak_reference(),
+                             surface,
                              shell_surface.weak_reference());
     };
     request_fullscreen_listener => request_fullscreen_notify: |this: &mut XWaylandShell,
                                                                _data: *mut libc::c_void,|
     unsafe {
-        let (ref shell_surface, ref surface, ref mut manager) = this.data;
+        let (ref mut shell_surface, ref mut manager) = this.data;
+        let surface = shell_surface.surface();
         let compositor = match compositor_handle() {
             Some(handle) => handle,
             None => return
         };
         manager.on_fullscreen(compositor,
-                            surface.weak_reference(),
+                            surface,
                             shell_surface.weak_reference());
     };
     map_listener => map_notify: |this: &mut XWaylandShell, _data: *mut libc::c_void,|
     unsafe {
-        let (ref shell_surface, ref surface, ref mut manager) = this.data;
+        let (ref mut shell_surface, ref mut manager) = this.data;
+        let surface = shell_surface.surface();
         let compositor = match compositor_handle() {
             Some(handle) => handle,
             None => return
         };
         manager.on_map(compositor,
-                            surface.weak_reference(),
+                            surface,
                             shell_surface.weak_reference());
     };
     unmap_listener => unmap_notify: |this: &mut XWaylandShell, _data: *mut libc::c_void,|
     unsafe {
-        let (ref shell_surface, ref surface, ref mut manager) = this.data;
+        let (ref mut shell_surface, ref mut manager) = this.data;
+        let surface = shell_surface.surface();
         let compositor = match compositor_handle() {
             Some(handle) => handle,
             None => return
         };
         manager.on_unmap(compositor,
-                       surface.weak_reference(),
+                       surface,
                        shell_surface.weak_reference());
     };
     set_title_listener => set_title_notify: |this: &mut XWaylandShell, _data: *mut libc::c_void,|
     unsafe {
-        let (ref shell_surface, ref surface, ref mut manager) = this.data;
+        let (ref mut shell_surface, ref mut manager) = this.data;
+        let surface = shell_surface.surface();
         let compositor = match compositor_handle() {
             Some(handle) => handle,
             None => return
         };
         manager.title_set(compositor,
-                       surface.weak_reference(),
+                       surface,
                        shell_surface.weak_reference());
     };
     set_class_listener => set_class_notify: |this: &mut XWaylandShell, _data: *mut libc::c_void,|
     unsafe {
-        let (ref shell_surface, ref surface, ref mut manager) = this.data;
+        let (ref mut shell_surface, ref mut manager) = this.data;
+        let surface = shell_surface.surface();
         let compositor = match compositor_handle() {
             Some(handle) => handle,
             None => return
         };
         manager.class_set(compositor,
-                       surface.weak_reference(),
+                       surface,
                        shell_surface.weak_reference());
     };
     set_parent_listener => set_parent_notify: |this: &mut XWaylandShell, _data: *mut libc::c_void,|
     unsafe {
-        let (ref shell_surface, ref surface, ref mut manager) = this.data;
+        let (ref mut shell_surface, ref mut manager) = this.data;
+        let surface = shell_surface.surface();
         let compositor = match compositor_handle() {
             Some(handle) => handle,
             None => return
         };
         manager.parent_set(compositor,
-                       surface.weak_reference(),
+                       surface,
                        shell_surface.weak_reference());
     };
     set_pid_listener => set_pid_notify: |this: &mut XWaylandShell, _data: *mut libc::c_void,|
     unsafe {
-        let (ref shell_surface, ref surface, ref mut manager) = this.data;
+        let (ref mut shell_surface, ref mut manager) = this.data;
+        let surface = shell_surface.surface();
         let compositor = match compositor_handle() {
             Some(handle) => handle,
             None => return
         };
         manager.pid_set(compositor,
-                       surface.weak_reference(),
+                       surface,
                        shell_surface.weak_reference());
     };
     set_window_type_listener => set_window_type_notify: |this: &mut XWaylandShell,
                                                          _data: *mut libc::c_void,|
     unsafe {
-        let (ref shell_surface, ref surface, ref mut manager) = this.data;
+        let (ref mut shell_surface, ref mut manager) = this.data;
+        let surface = shell_surface.surface();
         let compositor = match compositor_handle() {
             Some(handle) => handle,
             None => return
         };
         manager.window_type_set(compositor,
-                       surface.weak_reference(),
+                       surface,
                        shell_surface.weak_reference());
     };
     ping_timeout_listener => ping_timeout_notify: |this: &mut XWaylandShell,
                                                    _data: *mut libc::c_void,|
     unsafe {
-        let (ref shell_surface, ref surface, ref mut manager) = this.data;
+        let (ref mut shell_surface, ref mut manager) = this.data;
+        let surface = shell_surface.surface();
         let compositor = match compositor_handle() {
             Some(handle) => handle,
             None => return
         };
         manager.ping_timeout(compositor,
-                             surface.weak_reference(),
+                             surface,
                              shell_surface.weak_reference());
     };
 ]);
@@ -224,7 +237,7 @@ impl XWaylandShell {
     }
 
     pub(crate) unsafe fn data(&mut self)
-                              -> &mut (XWaylandSurface, Surface, Box<XWaylandSurfaceHandler>) {
+                              -> &mut (XWaylandSurface, Box<XWaylandSurfaceHandler>) {
         &mut self.data
     }
 }

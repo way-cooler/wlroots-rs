@@ -6,7 +6,7 @@ use wayland_sys::server::signal::wl_signal_add;
 use wlroots_sys::{wlr_xdg_surface, wlr_xdg_surface_role::*};
 
 use super::xdg_shell_handler::XdgShell;
-use {Surface, XdgPopup, XdgShellHandler, XdgShellState::*, XdgShellSurface,
+use {SurfaceHandle, XdgPopup, XdgShellHandler, XdgShellState::*, XdgShellSurface,
      XdgShellSurfaceHandle, XdgTopLevel};
 use compositor::{compositor_handle, CompositorHandle};
 
@@ -32,7 +32,7 @@ wayland_listener!(XdgShellManager, (Vec<Box<XdgShell>>, Box<XdgShellManagerHandl
             None => return
         };
         wlr_log!(L_DEBUG, "New xdg_shell_surface request {:p}", data);
-        let surface = Surface::new((*data).surface);
+        let surface = SurfaceHandle::from_ptr((*data).surface);
         let state = unsafe {
             match (*data).role {
                 WLR_XDG_SURFACE_ROLE_NONE => None,
@@ -53,9 +53,7 @@ wayland_listener!(XdgShellManager, (Vec<Box<XdgShell>>, Box<XdgShellManagerHandl
 
         if let Some(shell_surface_handler) = new_surface_res {
 
-            let mut shell_surface = XdgShell::new((shell_surface,
-                                                     surface,
-                                                     shell_surface_handler));
+            let mut shell_surface = XdgShell::new((shell_surface, shell_surface_handler));
 
             // Hook the destroy event into this manager.
             wl_signal_add(&mut (*data).events.destroy as *mut _ as _,

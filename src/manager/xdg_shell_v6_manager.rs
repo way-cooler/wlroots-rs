@@ -6,7 +6,7 @@ use wayland_sys::server::signal::wl_signal_add;
 use wlroots_sys::{wlr_xdg_surface_v6, wlr_xdg_surface_v6_role::*};
 
 use super::xdg_shell_v6_handler::XdgV6Shell;
-use {Surface, XdgV6Popup, XdgV6ShellHandler, XdgV6ShellState::*, XdgV6ShellSurface,
+use {SurfaceHandle, XdgV6Popup, XdgV6ShellHandler, XdgV6ShellState::*, XdgV6ShellSurface,
      XdgV6ShellSurfaceHandle, XdgV6TopLevel};
 use compositor::{compositor_handle, CompositorHandle};
 
@@ -32,7 +32,7 @@ wayland_listener!(XdgV6ShellManager, (Vec<Box<XdgV6Shell>>, Box<XdgV6ShellManage
             None => return
         };
         wlr_log!(L_DEBUG, "New xdg_shell_v6_surface request {:p}", data);
-        let surface = Surface::new((*data).surface);
+        let surface = SurfaceHandle::from_ptr((*data).surface);
         let state = unsafe {
             match (*data).role {
                 WLR_XDG_SURFACE_V6_ROLE_NONE => None,
@@ -53,9 +53,7 @@ wayland_listener!(XdgV6ShellManager, (Vec<Box<XdgV6Shell>>, Box<XdgV6ShellManage
 
         if let Some(shell_surface_handler) = new_surface_res {
 
-            let mut shell_surface = XdgV6Shell::new((shell_surface,
-                                                     surface,
-                                                     shell_surface_handler));
+            let mut shell_surface = XdgV6Shell::new((shell_surface, shell_surface_handler));
 
             // Hook the destroy event into this manager.
             wl_signal_add(&mut (*data).events.destroy as *mut _ as _,

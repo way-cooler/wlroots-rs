@@ -6,7 +6,7 @@ use wlroots_sys::wlr_xwayland_surface;
 use libc;
 
 use super::surface::{XWaylandShell, XWaylandSurface, XWaylandSurfaceHandle, XWaylandSurfaceHandler};
-use Surface;
+use SurfaceHandle;
 use compositor::{compositor_handle, CompositorHandle};
 
 pub trait XWaylandManagerHandler {
@@ -44,10 +44,10 @@ wayland_listener!(XWaylandManager, (Vec<Box<XWaylandShell>>, Box<XWaylandManager
             Some(handle) => handle,
             None => return
         };
-        let surface = Surface::new((*surface_ptr).surface);
+        let surface = SurfaceHandle::from_ptr((*surface_ptr).surface);
         let shell_surface = XWaylandSurface::new(surface_ptr);
         if let Some(handler) = manager.new_surface(compositor, shell_surface.weak_reference()) {
-            let mut shell = XWaylandShell::new((shell_surface, surface, handler));
+            let mut shell = XWaylandShell::new((shell_surface, handler));
             // Listen to destroy signal in this struct to free user data.
             wl_signal_add(&mut (*surface_ptr).events.destroy as *mut _ as _,
                           surface_destroyed_listener);
@@ -96,9 +96,10 @@ wayland_listener!(XWaylandManager, (Vec<Box<XWaylandShell>>, Box<XWaylandManager
             .position(|shell| shell.as_ptr() == surface);
         if let Some(index) = find_index {
             let mut removed_shell = shells.remove(index);
-            let (ref shell_surface, ref surface, ref mut manager) = *removed_shell.data();
+            let (ref shell_surface, ref mut manager) = *removed_shell.data();
+            let surface = shell_surface.surface();
             manager.destroy(compositor,
-                            surface.weak_reference(),
+                            surface,
                             shell_surface.weak_reference())
         }
     };
