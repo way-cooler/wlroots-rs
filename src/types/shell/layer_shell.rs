@@ -116,10 +116,6 @@ impl LayerSurface {
                        layer_surface }
     }
 
-    pub(crate) unsafe fn as_ptr(&self) -> *mut wlr_layer_surface {
-        self.layer_surface
-    }
-
     unsafe fn from_handle(handle: &LayerSurfaceHandle) -> HandleResult<Self> {
         let liveliness = handle.handle
                                .upgrade()

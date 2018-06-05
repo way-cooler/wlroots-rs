@@ -15,7 +15,7 @@ use render::GenericRenderer;
 
 use wayland_sys::server::{wl_display, wl_event_loop, signal::wl_signal_add, WAYLAND_SERVER_HANDLE};
 use wlroots_sys::{wlr_backend, wlr_backend_autocreate, wlr_backend_destroy, wlr_backend_start,
-                  wlr_compositor, wlr_compositor_create, wlr_compositor_destroy, wlr_wl_shell,
+                  wlr_compositor, wlr_compositor_create, wlr_compositor_destroy,
                   wlr_xdg_shell_v6, wlr_xdg_shell_v6_create,
                   wlr_xdg_shell, wlr_xdg_shell_create, wlr_layer_shell_create, wlr_layer_shell};
 use wlroots_sys::wayland_server::sys::wl_display_init_shm;
@@ -331,7 +331,7 @@ impl CompositorBuilder {
             let mut layer_shell_global = ptr::null_mut();
             let layer_shell_manager = self.layer_shell_manager_handler.map(|handler| {
                 layer_shell_global = wlr_layer_shell_create(display as *mut _);
-                let mut layer_shell_manager = LayerShellManager::new((vec![], handler));
+                let mut layer_shell_manager = LayerShellManager::new(handler);
                 wl_signal_add(&mut (*layer_shell_global).events.new_surface as *mut _ as _,
                               layer_shell_manager.add_listener() as *mut _ as _);
                 layer_shell_manager
