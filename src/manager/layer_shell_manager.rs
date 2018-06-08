@@ -4,7 +4,7 @@ use libc;
 use wayland_sys::server::signal::wl_signal_add;
 use wlroots_sys::wlr_layer_surface;
 
-use {LayerSurface, LayerSurfaceHandle, LayerShellHandler, Surface, OutputHandle};
+use {LayerSurface, LayerSurfaceHandle, LayerShellHandler, Surface, SurfaceHandle, OutputHandle};
 use super::layer_shell_handler::LayerShell;
 use compositor::{compositor_handle, CompositorHandle};
 
@@ -30,7 +30,7 @@ wayland_listener!(LayerShellManager, Box<LayerShellManagerHandler>, [
             None => return
         };
         wlr_log!(L_DEBUG, "New layer shell surface request {:p}", layer_surface_ptr);
-        let surface = Surface::new((*layer_surface_ptr).surface);
+        let surface = SurfaceHandle::from_ptr((*layer_surface_ptr).surface);
         let mut layer_surface = LayerSurface::new(layer_surface_ptr);
         let mut output = if (*layer_surface_ptr).output.is_null() {
             None
@@ -43,9 +43,7 @@ wayland_listener!(LayerShellManager, Box<LayerShellManagerHandler>, [
             return
         }
         if let Some(layer_surface_handler) = new_surface_res {
-            let mut layer_surface = LayerShell::new((layer_surface,
-                                                     surface,
-                                                     layer_surface_handler));
+            let mut layer_surface = LayerShell::new((layer_surface, layer_surface_handler));
             wl_signal_add(&mut (*layer_surface_ptr).events.destroy as *mut _ as _,
                           layer_surface.destroy_listener() as _);
             wl_signal_add(&mut (*layer_surface_ptr).events.map as *mut _ as _,

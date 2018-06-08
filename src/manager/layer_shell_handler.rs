@@ -32,17 +32,18 @@ pub trait LayerShellHandler {
     fn destroyed(&mut self, CompositorHandle, SurfaceHandle, LayerSurfaceHandle) {}
 }
 
-wayland_listener!(LayerShell, (LayerSurface, Surface, Box<LayerShellHandler>), [
+wayland_listener!(LayerShell, (LayerSurface, Box<LayerShellHandler>), [
     destroy_listener => destroy_notify: |this: &mut LayerShell, data: *mut libc::c_void,| unsafe {
         let layer_surface_ptr = data as *mut wlr_layer_surface;
         {
-            let (ref shell_surface, ref surface, ref mut manager) = this.data;
+            let (ref shell_surface, ref mut manager) = this.data;
+            let surface = shell_surface.surface();
             let compositor = match compositor_handle() {
                 Some(handle) => handle,
                 None => return
             };
             manager.destroyed(compositor,
-                            surface.weak_reference(),
+                            surface,
                             shell_surface.weak_reference());
         }
         ffi_dispatch!(WAYLAND_SERVER_HANDLE,
@@ -60,30 +61,33 @@ wayland_listener!(LayerShell, (LayerSurface, Surface, Box<LayerShellHandler>), [
         Box::from_raw((*layer_surface_ptr).data as *mut LayerShell);
     };
     on_map_listener => on_map_notify: |this: &mut LayerShell, _data: *mut libc::c_void,| unsafe {
-        let (ref shell_surface, ref surface, ref mut manager) = this.data;
+        let (ref shell_surface, ref mut manager) = this.data;
+        let surface = shell_surface.surface();
         let compositor = match compositor_handle() {
             Some(handle) => handle,
             None => return
         };
         manager.on_map(compositor,
-                       surface.weak_reference(),
+                       surface,
                        shell_surface.weak_reference());
     };
     on_unmap_listener => on_unmap_notify: |this: &mut LayerShell, _data: *mut libc::c_void,|
     unsafe {
-        let (ref shell_surface, ref surface, ref mut manager) = this.data;
+        let (ref shell_surface, ref mut manager) = this.data;
+        let surface = shell_surface.surface();
         let compositor = match compositor_handle() {
             Some(handle) => handle,
             None => return
         };
 
         manager.on_unmap(compositor,
-                         surface.weak_reference(),
+                         surface,
                          shell_surface.weak_reference());
     };
     new_popup_listener => new_popup_notify: |this: &mut LayerShell, data: *mut libc::c_void,|
     unsafe {
-        let (ref shell_surface, ref surface, ref mut manager) = this.data;
+        let (ref shell_surface, ref mut manager) = this.data;
+        let surface = shell_surface.surface();
         let compositor = match compositor_handle() {
             Some(handle) => handle,
             None => return
@@ -94,7 +98,7 @@ wayland_listener!(LayerShell, (LayerSurface, Surface, Box<LayerShellHandler>), [
         let xdg_surface = XdgShellSurface::new(xdg_surface_ptr, XdgShellState::Popup(popup));
 
         let res = manager.new_popup(compositor,
-                                    surface.weak_reference(),
+                                    surface,
                                     shell_surface.weak_reference(),
                                     xdg_surface.weak_reference());
         if let (Some(shell_surface_handler), surface_handler) = res {
