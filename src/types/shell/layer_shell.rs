@@ -20,12 +20,12 @@ use libc::{c_double, c_void};
 use wlroots_sys::{wlr_layer_surface_state, wlr_layer_surface,
                   wlr_layer_surface_configure, wlr_layer_surface_close,
                   wlr_layer_surface_for_each_surface, wlr_surface,
-                  wlr_layer_surface_surface_at, zwlr_layer_shell_v1_layer};
+                  wlr_layer_surface_surface_at, zwlr_layer_shell_v1_layer, wlr_xdg_popup};
 
 use utils::c_to_rust_string;
 use errors::{HandleErr, HandleResult};
 
-use {SurfaceHandle, OutputHandle};
+use {SurfaceHandle, OutputHandle, XdgShellSurfaceHandle};
 
 #[derive(Debug)]
 pub struct LayerSurface {
@@ -150,8 +150,18 @@ impl LayerSurface {
         }
     }
 
-    // TODO Implement when xdg shell stable is implemented
-    //pub fn popups(&self) -> Vec<>
+    /// Get a list of all the popups for this layer surface.
+    pub fn popups(&self) -> Vec<XdgShellSurfaceHandle> {
+        unsafe {
+            let mut result = vec![];
+            wl_list_for_each!((*self.layer_surface).popups,
+                              link,
+                              (popup: wlr_xdg_popup) => {
+                result.push(XdgShellSurfaceHandle::from_ptr((*popup).base))
+            });
+            result
+        }
+    }
 
     /// Get the namespace this surface resides in.
     pub fn namespace(&self) -> Option<String> {
