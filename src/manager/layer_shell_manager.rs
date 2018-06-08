@@ -4,15 +4,20 @@ use libc;
 use wayland_sys::server::signal::wl_signal_add;
 use wlroots_sys::wlr_layer_surface;
 
-use {LayerSurface, LayerSurfaceHandle, LayerShellHandler, Surface};
+use {LayerSurface, LayerSurfaceHandle, LayerShellHandler, Surface, OutputHandle};
 use super::layer_shell_handler::LayerShell;
 use compositor::{compositor_handle, CompositorHandle};
 
 pub trait LayerShellManagerHandler {
     /// Callback that is triggered when a new layer shell surface appears.
+    ///
+    /// The output is the output that was specified by the client.
+    /// If it was `None` then none was specified and you *must* specify it.
+    /// Do so by setting the value in the `Option`.
     fn new_surface(&mut self,
                    CompositorHandle,
-                   LayerSurfaceHandle)
+                   LayerSurfaceHandle,
+                   &mut Option<OutputHandle>)
                    -> Option<Box<LayerShellHandler>>;
 }
 
@@ -26,8 +31,17 @@ wayland_listener!(LayerShellManager, Box<LayerShellManagerHandler>, [
         };
         wlr_log!(L_DEBUG, "New layer shell surface request {:p}", layer_surface_ptr);
         let surface = Surface::new((*layer_surface_ptr).surface);
-        let layer_surface = LayerSurface::new(layer_surface_ptr);
-        let new_surface_res = manager.new_surface(compositor, layer_surface.weak_reference());
+        let mut layer_surface = LayerSurface::new(layer_surface_ptr);
+        let mut output = if (*layer_surface_ptr).output.is_null() {
+            None
+        } else {
+            Some(OutputHandle::from_ptr((*layer_surface_ptr).output))
+        };
+        let new_surface_res = manager.new_surface(compositor, layer_surface.weak_reference(), &mut output);
+        if output.is_none() {
+            layer_surface.close();
+            return
+        }
         if let Some(layer_surface_handler) = new_surface_res {
             let mut layer_surface = LayerShell::new((layer_surface,
                                                      surface,

@@ -107,10 +107,6 @@ impl <'surface> LayerSurfaceConfigure<'surface> {
 
 impl LayerSurface {
     pub(crate) unsafe fn new(layer_surface: *mut wlr_layer_surface) -> Self {
-        if (*layer_surface).output.is_null() {
-            // TODO Don't do this, instead gotta return a builder
-            panic!("Layer surface had a null output")
-        }
         let liveliness = Rc::new(Cell::new(false));
         LayerSurface { liveliness,
                        layer_surface }
