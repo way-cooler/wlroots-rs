@@ -4,7 +4,7 @@ use libc;
 use wayland_sys::server::signal::wl_signal_add;
 use wlroots_sys::wlr_layer_surface;
 
-use {LayerSurface, LayerSurfaceHandle, LayerShellHandler, Surface, SurfaceHandle, OutputHandle};
+use {LayerSurface, LayerSurfaceHandle, LayerShellHandler, OutputHandle};
 use super::layer_shell_handler::LayerShell;
 use compositor::{compositor_handle, CompositorHandle};
 
@@ -30,7 +30,6 @@ wayland_listener!(LayerShellManager, Box<LayerShellManagerHandler>, [
             None => return
         };
         wlr_log!(L_DEBUG, "New layer shell surface request {:p}", layer_surface_ptr);
-        let surface = SurfaceHandle::from_ptr((*layer_surface_ptr).surface);
         let mut layer_surface = LayerSurface::new(layer_surface_ptr);
         let mut output = if (*layer_surface_ptr).output.is_null() {
             None
@@ -38,7 +37,9 @@ wayland_listener!(LayerShellManager, Box<LayerShellManagerHandler>, [
             Some(OutputHandle::from_ptr((*layer_surface_ptr).output))
         };
         let new_surface_res = manager.new_surface(compositor, layer_surface.weak_reference(), &mut output);
-        if output.is_none() {
+        if let Some(output) = output {
+            (*layer_surface_ptr).output = output.as_ptr();
+        } else {
             layer_surface.close();
             return
         }

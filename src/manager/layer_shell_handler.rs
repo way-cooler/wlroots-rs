@@ -7,7 +7,7 @@ use wlroots_sys::{wlr_layer_surface, wlr_xdg_popup};
 
 use compositor::{compositor_handle, CompositorHandle};
 use manager::construct_xdg_shell;
-use {Surface, SurfaceHandle, LayerSurface, LayerSurfaceHandle, XdgShellSurface, XdgShellSurfaceHandle,
+use {SurfaceHandle, LayerSurface, LayerSurfaceHandle, XdgShellSurface, XdgShellSurfaceHandle,
      XdgPopup, XdgShellState, XdgShellHandler, SurfaceHandler};
 
 
