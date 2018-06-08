@@ -5,9 +5,10 @@ use libc;
 use wayland_sys::server::WAYLAND_SERVER_HANDLE;
 use wlroots_sys::{wlr_layer_surface, wlr_xdg_popup};
 
-use {Surface, SurfaceHandle, LayerSurface, LayerSurfaceHandle, XdgShellSurface, XdgShellSurfaceHandle,
-     XdgPopup, XdgShellState};
 use compositor::{compositor_handle, CompositorHandle};
+use manager::construct_xdg_shell;
+use {Surface, SurfaceHandle, LayerSurface, LayerSurfaceHandle, XdgShellSurface, XdgShellSurfaceHandle,
+     XdgPopup, XdgShellState, XdgShellHandler, SurfaceHandler};
 
 
 /// Handles events from the client layer shells.
@@ -23,7 +24,9 @@ pub trait LayerShellHandler {
     fn on_unmap(&mut self, CompositorHandle, SurfaceHandle, LayerSurfaceHandle) {}
 
     /// Called when there is a new popup.
-    fn new_popup(&mut self, CompositorHandle, SurfaceHandle, LayerSurfaceHandle, XdgShellSurfaceHandle) {}
+    fn new_popup(&mut self, CompositorHandle, SurfaceHandle, LayerSurfaceHandle, XdgShellSurfaceHandle)
+                 -> (Option<Box<XdgShellHandler>>, Option<Box<SurfaceHandler>>)
+    { (None, None) }
 
     /// Called when the Layer Shell is destroyed.
     fn destroyed(&mut self, CompositorHandle, SurfaceHandle, LayerSurfaceHandle) {}
@@ -86,17 +89,19 @@ wayland_listener!(LayerShell, (LayerSurface, Surface, Box<LayerShellHandler>), [
             None => return
         };
         let popup_ptr = data as *mut wlr_xdg_popup;
-        // TODO This seems really incorrect.
-        // Is base right?
-        // Shouldn't we store this somewhere now?
-        // ugh
-        let xdg_surface = (*popup_ptr).base;
-        let popup = XdgPopup::from_shell(xdg_surface, popup_ptr);
-        let xdg_surface = XdgShellSurface::new(xdg_surface, XdgShellState::Popup(popup));
+        let xdg_surface_ptr = (*popup_ptr).base;
+        let popup = XdgPopup::from_shell(xdg_surface_ptr, popup_ptr);
+        let xdg_surface = XdgShellSurface::new(xdg_surface_ptr, XdgShellState::Popup(popup));
 
-        manager.new_popup(compositor,
-                          surface.weak_reference(),
-                          shell_surface.weak_reference(),
-                          xdg_surface.weak_reference());
+        let res = manager.new_popup(compositor,
+                                    surface.weak_reference(),
+                                    shell_surface.weak_reference(),
+                                    xdg_surface.weak_reference());
+        if let (Some(shell_surface_handler), surface_handler) = res {
+            construct_xdg_shell(xdg_surface,
+                                shell_surface_handler,
+                                surface_handler,
+                                xdg_surface_ptr);
+        }
     };
 ]);

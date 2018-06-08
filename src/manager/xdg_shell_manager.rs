@@ -47,43 +47,49 @@ wayland_listener!(XdgShellManager, Box<XdgShellManagerHandler>, [
                                                   shell_surface.weak_reference());
 
         if let (Some(shell_surface_handler), surface_handler) = new_surface_res {
+            construct_xdg_shell(shell_surface, shell_surface_handler, surface_handler, data);
 
-            let mut shell_surface = XdgShell::new((shell_surface, shell_surface_handler));
-            let surface_state = (*(*data).surface).data as *mut InternalSurfaceState;
-            if let Some(surface_handler) = surface_handler {
-                (*(*surface_state).surface).data().1 = surface_handler;
-            }
-
-            wl_signal_add(&mut (*data).events.destroy as *mut _ as _,
-                          shell_surface.destroy_listener() as _);
-            wl_signal_add(&mut (*(*data).surface).events.commit as *mut _ as _,
-                          shell_surface.commit_listener() as _);
-            wl_signal_add(&mut (*data).events.ping_timeout as *mut _ as _,
-                          shell_surface.ping_timeout_listener() as _);
-            wl_signal_add(&mut (*data).events.new_popup as *mut _ as _,
-                          shell_surface.new_popup_listener() as _);
-            let events = with_handles!([(shell_surface: {shell_surface.surface_mut()})] => {
-                match shell_surface.state() {
-                    None | Some(&mut Popup(_)) => None,
-                    Some(&mut TopLevel(ref mut toplevel)) => Some((*toplevel.as_ptr()).events)
-                }
-            }).expect("Cannot borrow xdg shell surface");
-            if let Some(mut events) = events {
-                wl_signal_add(&mut events.request_maximize as *mut _ as _,
-                              shell_surface.maximize_listener() as _);
-                wl_signal_add(&mut events.request_fullscreen as *mut _ as _,
-                              shell_surface.fullscreen_listener() as _);
-                wl_signal_add(&mut events.request_minimize as *mut _ as _,
-                              shell_surface.minimize_listener() as _);
-                wl_signal_add(&mut events.request_move as *mut _ as _,
-                              shell_surface.move_listener() as _);
-                wl_signal_add(&mut events.request_resize as *mut _ as _,
-                              shell_surface.resize_listener() as _);
-                wl_signal_add(&mut events.request_show_window_menu as *mut _ as _,
-                              shell_surface.show_window_menu_listener() as _);
-            }
-            let shell_data = (*data).data as *mut XdgShellSurfaceState;
-            (*shell_data).shell = Box::into_raw(shell_surface);
         }
     };
 ]);
+pub(crate) unsafe fn construct_xdg_shell(shell_surface: XdgShellSurface,
+                                         shell_surface_handler: Box<XdgShellHandler>,
+                                         surface_handler: Option<Box<SurfaceHandler>>,
+                                         data: *mut wlr_xdg_surface) {
+    let mut shell_surface = XdgShell::new((shell_surface, shell_surface_handler));
+    let surface_state = (*(*data).surface).data as *mut InternalSurfaceState;
+    if let Some(surface_handler) = surface_handler {
+        (*(*surface_state).surface).data().1 = surface_handler;
+    }
+
+    wl_signal_add(&mut (*data).events.destroy as *mut _ as _,
+                  shell_surface.destroy_listener() as _);
+    wl_signal_add(&mut (*(*data).surface).events.commit as *mut _ as _,
+                  shell_surface.commit_listener() as _);
+    wl_signal_add(&mut (*data).events.ping_timeout as *mut _ as _,
+                  shell_surface.ping_timeout_listener() as _);
+    wl_signal_add(&mut (*data).events.new_popup as *mut _ as _,
+                  shell_surface.new_popup_listener() as _);
+    let events = with_handles!([(shell_surface: {shell_surface.surface_mut()})] => {
+        match shell_surface.state() {
+            None | Some(&mut Popup(_)) => None,
+            Some(&mut TopLevel(ref mut toplevel)) => Some((*toplevel.as_ptr()).events)
+        }
+    }).expect("Cannot borrow xdg shell surface");
+    if let Some(mut events) = events {
+        wl_signal_add(&mut events.request_maximize as *mut _ as _,
+                      shell_surface.maximize_listener() as _);
+        wl_signal_add(&mut events.request_fullscreen as *mut _ as _,
+                      shell_surface.fullscreen_listener() as _);
+        wl_signal_add(&mut events.request_minimize as *mut _ as _,
+                      shell_surface.minimize_listener() as _);
+        wl_signal_add(&mut events.request_move as *mut _ as _,
+                      shell_surface.move_listener() as _);
+        wl_signal_add(&mut events.request_resize as *mut _ as _,
+                      shell_surface.resize_listener() as _);
+        wl_signal_add(&mut events.request_show_window_menu as *mut _ as _,
+                      shell_surface.show_window_menu_listener() as _);
+    }
+    let shell_data = (*data).data as *mut XdgShellSurfaceState;
+    (*shell_data).shell = Box::into_raw(shell_surface);
+}
