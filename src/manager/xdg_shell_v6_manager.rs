@@ -43,16 +43,17 @@ wayland_listener!(XdgV6ShellManager, Box<XdgV6ShellManagerHandler>, [
         };
         let shell_surface = XdgV6ShellSurface::new(data, state);
 
-        let new_surface_res = manager.new_surface(compositor,
-                                                  shell_surface.weak_reference());
+        let (shell_surface_handler, surface_handler) =
+            manager.new_surface(compositor, shell_surface.weak_reference());
 
-        if let (Some(shell_surface_handler), surface_handler) = new_surface_res {
+        if let Some(surface_handler) = surface_handler {
+            let surface_state = (*(*data).surface).data as *mut InternalSurfaceState;
+            (*(*surface_state).surface).data().1 = surface_handler;
+        }
+
+        if let Some(shell_surface_handler) = shell_surface_handler {
 
             let mut shell_surface = XdgV6Shell::new((shell_surface, shell_surface_handler));
-            let surface_state = (*(*data).surface).data as *mut InternalSurfaceState;
-            if let Some(surface_handler) = surface_handler {
-                (*(*surface_state).surface).data().1 = surface_handler;
-            }
 
             wl_signal_add(&mut (*data).events.destroy as *mut _ as _,
                           shell_surface.destroy_listener() as _);
