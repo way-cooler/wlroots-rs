@@ -11,63 +11,54 @@ use wlroots::key_events::KeyEvent;
 use wlroots::pointer_events::{AbsoluteMotionEvent, AxisEvent, ButtonEvent, MotionEvent};
 use wlroots::utils::{init_logging, WLR_DEBUG};
 use wlroots::wlroots_sys::wlr_button_state::WLR_BUTTON_RELEASED;
-use wlroots::xkbcommon::xkb::keysyms::KEY_Escape;
+use wlroots::xkbcommon::xkb::keysyms;
 
-struct State {
+const MOUSE_AXIS_DELTA_STEP: f32 = 0.05;
+
+struct CompositorState {
     color: [f32; 4],
     default_color: [f32; 4],
     xcursor_manager: XCursorManager,
-    cursor: CursorHandle,
-    layout: OutputLayoutHandle
+    layout_handle: OutputLayoutHandle,
+    cursor_handle: CursorHandle,
 }
-
-impl State {
+impl CompositorState {
     fn new(xcursor_manager: XCursorManager,
-           layout: OutputLayoutHandle,
-           cursor: CursorHandle)
+           layout_handle: OutputLayoutHandle,
+           cursor_handle: CursorHandle)
            -> Self {
-        State { color: [0.25, 0.25, 0.25, 1.0],
-                default_color: [0.25, 0.25, 0.25, 1.0],
-                xcursor_manager,
-                cursor,
-                layout }
+        CompositorState { color: [0.25, 0.25, 0.25, 1.0],
+                          default_color: [0.25, 0.25, 0.25, 1.0],
+                          xcursor_manager,
+                          layout_handle,
+                          cursor_handle,
+        }
     }
 }
 
-compositor_data!(State);
+compositor_data!(CompositorState);
 
 struct ExCursor;
-
-struct OutputManager;
-
-struct ExOutput;
-
-struct InputManager;
-
-struct ExPointer;
-
-struct ExKeyboardHandler;
-
-struct OutputLayoutEx;
-
 impl CursorHandler for ExCursor {}
 
-impl OutputLayoutHandler for OutputLayoutEx {}
+struct ExOutputLayout;
+impl OutputLayoutHandler for ExOutputLayout {}
 
+struct OutputManager;
 impl OutputManagerHandler for OutputManager {
     fn output_added<'output>(&mut self,
-                             compositor: CompositorHandle,
-                             builder: OutputBuilder<'output>)
+                             compositor_handle: CompositorHandle,
+                             output_builder: OutputBuilder<'output>)
                              -> Option<OutputBuilderResult<'output>> {
-        let mut result = builder.build_best_mode(ExOutput);
-        with_handles!([(compositor: {compositor})] => {
-            let state: &mut State = compositor.data.downcast_mut().unwrap();
-            let layout = &mut state.layout;
-            let cursor = &mut state.cursor;
-            let xcursor_manager = &mut state.xcursor_manager;
+        let mut result = output_builder.build_best_mode(ExOutput);
+        with_handles!([(compositor: {compositor_handle})] => {
+            let compositor_state: &mut CompositorState = compositor.data.downcast_mut().unwrap();
+            let layout_handle = &mut compositor_state.layout_handle;
+            let cursor_handle = &mut compositor_state.cursor_handle;
+            let xcursor_manager = &mut compositor_state.xcursor_manager;
             // TODO use output config if present instead of auto
-            with_handles!([(layout: {layout}),
-                          (cursor: {cursor}),
+            with_handles!([(layout: {layout_handle}),
+                          (cursor: {cursor_handle}),
                           (output: {&mut result.output})] => {
                 layout.add_auto(output);
                 cursor.attach_output_layout(layout);
@@ -82,89 +73,97 @@ impl OutputManagerHandler for OutputManager {
     }
 }
 
+struct ExKeyboardHandler;
 impl KeyboardHandler for ExKeyboardHandler {
-    fn on_key(&mut self, _: CompositorHandle, _: KeyboardHandle, key_event: &KeyEvent) {
+    fn on_key(&mut self, _compositor_handle: CompositorHandle, _keyboard_handle: KeyboardHandle, key_event: &KeyEvent) {
         for key in key_event.pressed_keys() {
-            if key == KEY_Escape {
-                wlroots::terminate()
+            match key {
+                keysyms::KEY_Escape => wlroots::terminate(),
+                _ => {}
             }
         }
     }
 }
 
+struct ExPointer;
 impl PointerHandler for ExPointer {
     fn on_motion_absolute(&mut self,
-                          compositor: CompositorHandle,
-                          _: PointerHandle,
-                          event: &AbsoluteMotionEvent) {
-        with_handles!([(compositor: {compositor})] => {
-            let state: &mut State = compositor.into();
-            let (x, y) = event.pos();
-            state.cursor
-                .run(|cursor| cursor.warp_absolute(event.device(), x, y))
+                          compositor_handle: CompositorHandle,
+                          _pointer_handle: PointerHandle,
+                          absolute_motion_event: &AbsoluteMotionEvent) {
+        with_handles!([(compositor: {compositor_handle})] => {
+            let compositor_state: &mut CompositorState = compositor.into();
+            let (x, y) = absolute_motion_event.pos();
+            compositor_state.cursor_handle
+                .run(|cursor| cursor.warp_absolute(absolute_motion_event.device(), x, y))
                 .unwrap();
         }).unwrap();
     }
 
-    fn on_motion(&mut self, compositor: CompositorHandle, _: PointerHandle, event: &MotionEvent) {
-        with_handles!([(compositor: {compositor})] => {
-            let state: &mut State = compositor.into();
-            let (delta_x, delta_y) = event.delta();
-            state.cursor
+    fn on_motion(&mut self, compositor_handle: CompositorHandle, _pointer_handle: PointerHandle, motion_event: &MotionEvent) {
+        with_handles!([(compositor: {compositor_handle})] => {
+            let compositor_state: &mut CompositorState = compositor.into();
+            let (delta_x, delta_y) = motion_event.delta();
+            compositor_state.cursor_handle
                 .run(|cursor| cursor.move_to(None, delta_x, delta_y))
                 .unwrap();
         }).unwrap();
     }
 
-    fn on_button(&mut self, compositor: CompositorHandle, _: PointerHandle, event: &ButtonEvent) {
-        with_handles!([(compositor: {compositor})] => {
-            let state: &mut State = compositor.into();
-            if event.state() == WLR_BUTTON_RELEASED {
-                state.color = state.default_color;
-            } else {
-                state.color = [0.25, 0.25, 0.25, 1.0];
-                state.color[event.button() as usize % 3] = 1.0;
-            }
+    fn on_button(&mut self, compositor_handle: CompositorHandle, _pointer_handle: PointerHandle, button_event: &ButtonEvent) {
+        with_handles!([(compositor: {compositor_handle})] => {
+            let compositor_state: &mut CompositorState = compositor.into();
+            compositor_state.color =
+                if button_event.state() == WLR_BUTTON_RELEASED {
+                    compositor_state.default_color
+                } else {
+                    let mut mouse_button_color = [0.25, 0.25, 0.25, 1.0];
+                    mouse_button_color[button_event.button() as usize % 3] = 1.0;
+                    mouse_button_color
+                };
         }).unwrap();
     }
 
-    fn on_axis(&mut self, compositor: CompositorHandle, _: PointerHandle, event: &AxisEvent) {
-        with_handles!([(compositor: {compositor})] => {
-            let state: &mut State = compositor.into();
-            for color_byte in &mut state.default_color[..3] {
-                *color_byte += if event.delta() > 0.0 { -0.05 } else { 0.05 };
+    fn on_axis(&mut self, compositor_handle: CompositorHandle, _pointer_handle: PointerHandle, axis_event: &AxisEvent) {
+        with_handles!([(compositor: {compositor_handle})] => {
+            let compositor_state: &mut CompositorState = compositor.into();
+            let color_diff = if axis_event.delta() > 0.0 { -MOUSE_AXIS_DELTA_STEP } else { MOUSE_AXIS_DELTA_STEP };
+            for color_byte in &mut compositor_state.default_color[..3] {
+                *color_byte += color_diff;
                 if *color_byte > 1.0 {
-                    *color_byte = 1.0
+                    *color_byte = 1.0;
                 }
                 if *color_byte < 0.0 {
-                    *color_byte = 0.0
+                    *color_byte = 0.0;
                 }
             }
-            state.color = state.default_color.clone()
+            compositor_state.color = compositor_state.default_color.clone()
         }).unwrap();
     }
 }
 
+struct ExOutput;
 impl OutputHandler for ExOutput {
-    fn on_frame(&mut self, compositor: CompositorHandle, output: OutputHandle) {
-        with_handles!([(compositor: {compositor}), (output: {output})] => {
-            let state: &mut State = compositor.data.downcast_mut().unwrap();
+    fn on_frame(&mut self, compositor_handle: CompositorHandle, output_handle: OutputHandle) {
+        with_handles!([(compositor: {compositor_handle}), (output: {output_handle})] => {
+            let compositor_state: &mut CompositorState = compositor.data.downcast_mut().unwrap();
             let renderer = compositor.renderer.as_mut()
                 .expect("Compositor was not loaded with a renderer");
             let mut render_context = renderer.render(output, None);
-            render_context.clear([state.color[0], state.color[1], state.color[2], 1.0]);
+            render_context.clear(compositor_state.color);
         }).unwrap();
     }
 }
 
+struct InputManager;
 impl InputManagerHandler for InputManager {
     fn pointer_added(&mut self,
-                     compositor: CompositorHandle,
-                     pointer: PointerHandle)
+                     compositor_handle: CompositorHandle,
+                     pointer_handle: PointerHandle)
                      -> Option<Box<PointerHandler>> {
-        with_handles!([(compositor: {compositor}), (pointer: {pointer})] => {
-            let state: &mut State = compositor.into();
-            state.cursor
+        with_handles!([(compositor: {compositor_handle}), (pointer: {pointer_handle})] => {
+            let compositor_state: &mut CompositorState = compositor.into();
+            compositor_state.cursor_handle
                 .run(|cursor| cursor.attach_input_device(pointer.input_device()))
                 .unwrap();
         }).unwrap();
@@ -172,28 +171,33 @@ impl InputManagerHandler for InputManager {
     }
 
     fn keyboard_added(&mut self,
-                      _: CompositorHandle,
-                      _: KeyboardHandle)
+                      _compositor_handle: CompositorHandle,
+                      _keyboard_handle: KeyboardHandle)
                       -> Option<Box<KeyboardHandler>> {
         Some(Box::new(ExKeyboardHandler))
     }
 }
 
-fn main() {
-    init_logging(WLR_DEBUG, None);
-    let cursor = Cursor::create(Box::new(ExCursor));
+fn load_xcursor() -> (XCursorManager, CursorHandle) {
+    let cursor_handle = Cursor::create(Box::new(ExCursor));
     let mut xcursor_manager =
         XCursorManager::create("default".to_string(), 24).expect("Could not create xcursor \
                                                                   manager");
     xcursor_manager.load(1.0);
-    cursor.run(|c| xcursor_manager.set_cursor_image("left_ptr".to_string(), c))
+    cursor_handle.run(|c| xcursor_manager.set_cursor_image("left_ptr".to_string(), c))
           .unwrap();
-    let layout = OutputLayout::create(Box::new(OutputLayoutEx));
+    (xcursor_manager, cursor_handle)
+}
+
+fn main() {
+    init_logging(WLR_DEBUG, None);
+    let (xcursor_manager, cursor_handle) = load_xcursor();
+    let layout_handle = OutputLayout::create(Box::new(ExOutputLayout));
 
     let compositor =
         CompositorBuilder::new().gles2(true)
                                 .input_manager(Box::new(InputManager))
                                 .output_manager(Box::new(OutputManager))
-                                .build_auto(State::new(xcursor_manager, layout, cursor));
+                                .build_auto(CompositorState::new(xcursor_manager, layout_handle, cursor_handle));
     compositor.run();
 }
