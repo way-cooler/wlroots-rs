@@ -334,11 +334,13 @@ impl XdgV6TopLevel {
 
     /// Get the title associated with this XDG shell toplevel.
     pub fn title(&self) -> String {
+        self.assert_toplevel();
         unsafe { c_to_rust_string((*self.toplevel).title).expect("Could not parse class as UTF-8") }
     }
 
     /// Get the app id associated with this XDG shell toplevel.
     pub fn app_id(&self) -> String {
+        self.assert_toplevel();
         unsafe {
             c_to_rust_string((*self.toplevel).app_id).expect("Could not parse class as UTF-8")
         }
@@ -346,30 +348,36 @@ impl XdgV6TopLevel {
 
     /// Get a handle to the base surface of the xdg tree.
     pub fn base(&self) -> XdgV6ShellSurfaceHandle {
+        self.assert_toplevel();
         unsafe { XdgV6ShellSurfaceHandle::from_ptr((*self.toplevel).base) }
     }
 
     /// Get a handle to the parent surface of the xdg tree.
     pub fn parent(&self) -> XdgV6ShellSurfaceHandle {
+        self.assert_toplevel();
         unsafe { XdgV6ShellSurfaceHandle::from_ptr((*self.toplevel).parent) }
     }
 
     pub fn added(&self) -> bool {
+        self.assert_toplevel();
         unsafe { (*self.toplevel).added }
     }
 
     /// Get the pending client state.
     pub fn client_pending_state(&self) -> wlr_xdg_toplevel_v6_state {
+        self.assert_toplevel();
         unsafe { (*self.toplevel).client_pending }
     }
 
     /// Get the pending server state.
     pub fn server_pending_state(&self) -> wlr_xdg_toplevel_v6_state {
+        self.assert_toplevel();
         unsafe { (*self.toplevel).server_pending }
     }
 
     /// Get the current configure state.
     pub fn current_state(&self) -> wlr_xdg_toplevel_v6_state {
+        self.assert_toplevel();
         unsafe { (*self.toplevel).current }
     }
 
@@ -377,6 +385,7 @@ impl XdgV6TopLevel {
     ///
     /// Returns the associated configure serial.
     pub fn set_size(&mut self, width: u32, height: u32) -> u32 {
+        self.assert_toplevel();
         unsafe { wlr_xdg_toplevel_v6_set_size(self.shell_surface, width, height) }
     }
 
@@ -385,6 +394,7 @@ impl XdgV6TopLevel {
     ///
     /// Returns the associated configure serial.
     pub fn set_activated(&mut self, activated: bool) -> u32 {
+        self.assert_toplevel();
         unsafe { wlr_xdg_toplevel_v6_set_activated(self.shell_surface, activated) }
     }
 
@@ -393,6 +403,7 @@ impl XdgV6TopLevel {
     ///
     /// Returns the associated configure serial.
     pub fn set_maximized(&mut self, maximized: bool) -> u32 {
+        self.assert_toplevel();
         unsafe { wlr_xdg_toplevel_v6_set_maximized(self.shell_surface, maximized) }
     }
 
@@ -401,6 +412,7 @@ impl XdgV6TopLevel {
     ///
     /// Returns the associated configure serial.
     pub fn set_fullscreen(&mut self, fullscreen: bool) -> u32 {
+        self.assert_toplevel();
         unsafe { wlr_xdg_toplevel_v6_set_fullscreen(self.shell_surface, fullscreen) }
     }
 
@@ -409,16 +421,27 @@ impl XdgV6TopLevel {
     ///
     /// Returns the associated configure serial.
     pub fn set_resizing(&mut self, resizing: bool) -> u32 {
+        self.assert_toplevel();
         unsafe { wlr_xdg_toplevel_v6_set_resizing(self.shell_surface, resizing) }
     }
 
     /// Request that this toplevel surface closes.
     pub fn close(&mut self) {
+        self.assert_toplevel();
         unsafe { wlr_xdg_surface_v6_send_close(self.shell_surface) }
     }
 
     pub(crate) unsafe fn as_ptr(&self) -> *mut wlr_xdg_toplevel_v6 {
         self.toplevel
+    }
+
+    /// Asserts that this is indeed a toplevel. This is done in wlroots, but is
+    /// also added here to make it easier to detect bugs.
+    fn assert_toplevel(&self) {
+        use wlroots_sys::wlr_xdg_surface_v6_role::WLR_XDG_SURFACE_V6_ROLE_TOPLEVEL;
+        unsafe {
+            assert!((*self.shell_surface).role == WLR_XDG_SURFACE_V6_ROLE_TOPLEVEL);
+        }
     }
 }
 
