@@ -440,7 +440,12 @@ impl XdgV6TopLevel {
     fn assert_toplevel(&self) {
         use wlroots_sys::wlr_xdg_surface_v6_role::WLR_XDG_SURFACE_V6_ROLE_TOPLEVEL;
         unsafe {
-            assert!((*self.shell_surface).role == WLR_XDG_SURFACE_V6_ROLE_TOPLEVEL);
+            if (*self.shell_surface).role != WLR_XDG_SURFACE_V6_ROLE_TOPLEVEL {
+                wlr_log!(WLR_ERROR, "Expected {:?} got {:?}",
+                         WLR_XDG_SURFACE_V6_ROLE_TOPLEVEL,
+                         (*self.shell_surface).role);
+                assert!((*self.shell_surface).role == WLR_XDG_SURFACE_V6_ROLE_TOPLEVEL);
+            }
         }
     }
 }
