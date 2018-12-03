@@ -358,8 +358,10 @@ impl XdgV6TopLevel {
     pub(crate) unsafe fn from_shell(shell_surface: *mut wlr_xdg_surface_v6,
                                     toplevel: *mut wlr_xdg_toplevel_v6)
                                     -> XdgV6TopLevel {
-        XdgV6TopLevel { shell_surface,
-                        toplevel }
+        let toplevel = XdgV6TopLevel { shell_surface,
+                                       toplevel };
+        toplevel.assert_toplevel();
+        toplevel
     }
 
     /// Get the title associated with this XDG shell toplevel.
