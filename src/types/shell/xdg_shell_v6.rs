@@ -48,14 +48,14 @@ pub enum XdgV6ShellState {
     ///
     /// If the client reuses the xdg surface it must make a top level as the role,
     /// so this could become non-inert again.
-    TopLevelInert(XdgV6TopLevel),
+    TopLevelUnmapped(XdgV6TopLevel),
     Popup(XdgV6Popup),
     /// A popup that has been destroyed. The state is not dropped but none
     /// of the functions can be used.
     ///
     /// If the client reuses the xdg surface it must make a popup as the role,
     /// so this could become non-inert again.
-    PopupInert(XdgV6Popup)
+    PopupUnmapped(XdgV6Popup)
 }
 
 #[derive(Debug)]
@@ -302,15 +302,15 @@ impl XdgV6ShellSurfaceHandle {
         let mut xdg_surface = unsafe { self.upgrade()? };
         match (xdg_surface.role(), xdg_surface.state.take()) {
             (WLR_XDG_SURFACE_V6_ROLE_NONE, Some(XdgV6ShellState::TopLevel(toplevel))) => {
-                xdg_surface.state = Some(XdgV6ShellState::TopLevelInert(toplevel))
+                xdg_surface.state = Some(XdgV6ShellState::TopLevelUnmapped(toplevel))
             }
-            (WLR_XDG_SURFACE_V6_ROLE_TOPLEVEL, Some(XdgV6ShellState::TopLevelInert(toplevel))) => {
+            (WLR_XDG_SURFACE_V6_ROLE_TOPLEVEL, Some(XdgV6ShellState::TopLevelUnmapped(toplevel))) => {
                 xdg_surface.state = Some(XdgV6ShellState::TopLevel(toplevel))
             }
             (WLR_XDG_SURFACE_V6_ROLE_NONE, Some(XdgV6ShellState::Popup(popup))) => {
-                xdg_surface.state = Some(XdgV6ShellState::PopupInert(popup))
+                xdg_surface.state = Some(XdgV6ShellState::PopupUnmapped(popup))
             }
-            (WLR_XDG_SURFACE_V6_ROLE_POPUP, Some(XdgV6ShellState::PopupInert(popup))) => {
+            (WLR_XDG_SURFACE_V6_ROLE_POPUP, Some(XdgV6ShellState::PopupUnmapped(popup))) => {
                 xdg_surface.state = Some(XdgV6ShellState::Popup(popup))
             }
             (_, state) => {
@@ -531,9 +531,9 @@ impl XdgV6ShellState {
                 TopLevel(XdgV6TopLevel { shell_surface,
                                          toplevel })
             }
-            TopLevelInert(XdgV6TopLevel { shell_surface,
+            TopLevelUnmapped(XdgV6TopLevel { shell_surface,
                                           toplevel }) => {
-                TopLevelInert(XdgV6TopLevel { shell_surface,
+                TopLevelUnmapped(XdgV6TopLevel { shell_surface,
                                               toplevel })
             }
             Popup(XdgV6Popup { shell_surface,
@@ -541,9 +541,9 @@ impl XdgV6ShellState {
                 Popup(XdgV6Popup { shell_surface,
                                    popup })
             }
-            PopupInert(XdgV6Popup { shell_surface,
+            PopupUnmapped(XdgV6Popup { shell_surface,
                                     popup }) => {
-                PopupInert(XdgV6Popup { shell_surface,
+                PopupUnmapped(XdgV6Popup { shell_surface,
                                         popup })
             }
         }
