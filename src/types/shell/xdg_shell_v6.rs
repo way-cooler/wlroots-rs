@@ -43,7 +43,19 @@ pub struct XdgV6Popup {
 #[derive(Debug, Eq, PartialEq, Hash)]
 pub enum XdgV6ShellState {
     TopLevel(XdgV6TopLevel),
-    Popup(XdgV6Popup)
+    /// A top level that has been destroyed. The state is not dropped but none
+    /// of the functions can be used.
+    ///
+    /// If the client reuses the xdg surface it must make a top level as the role,
+    /// so this could become non-inert again.
+    TopLevelInert(XdgV6TopLevel),
+    Popup(XdgV6Popup),
+    /// A popup that has been destroyed. The state is not dropped but none
+    /// of the functions can be used.
+    ///
+    /// If the client reuses the xdg surface it must make a popup as the role,
+    /// so this could become non-inert again.
+    PopupInert(XdgV6Popup)
 }
 
 #[derive(Debug)]
@@ -286,7 +298,25 @@ impl XdgV6ShellSurfaceHandle {
     pub fn run<F, R>(&self, runner: F) -> HandleResult<R>
         where F: FnOnce(&mut XdgV6ShellSurface) -> R
     {
+        use wlroots_sys::wlr_xdg_surface_v6_role::*;
         let mut xdg_surface = unsafe { self.upgrade()? };
+        match (xdg_surface.role(), xdg_surface.state.take()) {
+            (WLR_XDG_SURFACE_V6_ROLE_NONE, Some(XdgV6ShellState::TopLevel(toplevel))) => {
+                xdg_surface.state = Some(XdgV6ShellState::TopLevelInert(toplevel))
+            }
+            (WLR_XDG_SURFACE_V6_ROLE_TOPLEVEL, Some(XdgV6ShellState::TopLevelInert(toplevel))) => {
+                xdg_surface.state = Some(XdgV6ShellState::TopLevel(toplevel))
+            }
+            (WLR_XDG_SURFACE_V6_ROLE_NONE, Some(XdgV6ShellState::Popup(popup))) => {
+                xdg_surface.state = Some(XdgV6ShellState::PopupInert(popup))
+            }
+            (WLR_XDG_SURFACE_V6_ROLE_POPUP, Some(XdgV6ShellState::PopupInert(popup))) => {
+                xdg_surface.state = Some(XdgV6ShellState::Popup(popup))
+            }
+            (_, state) => {
+                xdg_surface.state = state
+            }
+        }
         let res = panic::catch_unwind(panic::AssertUnwindSafe(|| runner(&mut xdg_surface)));
         self.handle.upgrade().map(|check| {
                                       // Sanity check that it hasn't been tampered with.
@@ -499,10 +529,20 @@ impl XdgV6ShellState {
                 TopLevel(XdgV6TopLevel { shell_surface,
                                          toplevel })
             }
+            TopLevelInert(XdgV6TopLevel { shell_surface,
+                                          toplevel }) => {
+                TopLevelInert(XdgV6TopLevel { shell_surface,
+                                              toplevel })
+            }
             Popup(XdgV6Popup { shell_surface,
                                popup }) => {
                 Popup(XdgV6Popup { shell_surface,
                                    popup })
+            }
+            PopupInert(XdgV6Popup { shell_surface,
+                                    popup }) => {
+                PopupInert(XdgV6Popup { shell_surface,
+                                        popup })
             }
         }
     }

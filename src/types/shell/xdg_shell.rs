@@ -44,7 +44,19 @@ pub struct XdgPopup {
 #[derive(Debug, Eq, PartialEq, Hash)]
 pub enum XdgShellState {
     TopLevel(XdgTopLevel),
-    Popup(XdgPopup)
+    /// A top level that has been destroyed. The state is not dropped but none
+    /// of the functions can be used.
+    ///
+    /// If the client reuses the xdg surface it must make a top level as the role,
+    /// so this could become non-inert again.
+    TopLevelInert(XdgTopLevel),
+    Popup(XdgPopup),
+    /// A popup that has been destroyed. The state is not dropped but none
+    /// of the functions can be used.
+    ///
+    /// If the client reuses the xdg surface it must make a popup as the role,
+    /// so this could become non-inert again.
+    PopupInert(XdgPopup)
 }
 
 #[derive(Debug)]
@@ -296,7 +308,25 @@ impl XdgShellSurfaceHandle {
     pub fn run<F, R>(&self, runner: F) -> HandleResult<R>
         where F: FnOnce(&mut XdgShellSurface) -> R
     {
+        use wlroots_sys::wlr_xdg_surface_role::*;
         let mut xdg_surface = unsafe { self.upgrade()? };
+        match (xdg_surface.role(), xdg_surface.state.take()) {
+            (WLR_XDG_SURFACE_ROLE_NONE, Some(XdgShellState::TopLevel(toplevel))) => {
+                xdg_surface.state = Some(XdgShellState::TopLevelInert(toplevel))
+            }
+            (WLR_XDG_SURFACE_ROLE_TOPLEVEL, Some(XdgShellState::TopLevelInert(toplevel))) => {
+                xdg_surface.state = Some(XdgShellState::TopLevel(toplevel))
+            }
+            (WLR_XDG_SURFACE_ROLE_NONE, Some(XdgShellState::Popup(popup))) => {
+                xdg_surface.state = Some(XdgShellState::PopupInert(popup))
+            }
+            (WLR_XDG_SURFACE_ROLE_POPUP, Some(XdgShellState::PopupInert(popup))) => {
+                xdg_surface.state = Some(XdgShellState::Popup(popup))
+            }
+            (_, state) => {
+                xdg_surface.state = state
+            }
+        }
         let res = panic::catch_unwind(panic::AssertUnwindSafe(|| runner(&mut xdg_surface)));
         self.handle.upgrade().map(|check| {
                                       // Sanity check that it hasn't been tampered with.
@@ -507,14 +537,24 @@ impl XdgShellState {
         use XdgShellState::*;
         match *self {
             TopLevel(XdgTopLevel { shell_surface,
-                                     toplevel }) => {
+                                   toplevel }) => {
                 TopLevel(XdgTopLevel { shell_surface,
-                                         toplevel })
+                                       toplevel })
+            }
+            TopLevelInert(XdgTopLevel { shell_surface,
+                                        toplevel }) => {
+                TopLevelInert(XdgTopLevel { shell_surface,
+                                            toplevel })
             }
             Popup(XdgPopup { shell_surface,
-                               popup }) => {
+                             popup }) => {
                 Popup(XdgPopup { shell_surface,
-                                   popup })
+                                 popup })
+            }
+            PopupInert(XdgPopup { shell_surface,
+                                  popup }) => {
+                PopupInert(XdgPopup { shell_surface,
+                                      popup })
             }
         }
     }

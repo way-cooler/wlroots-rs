@@ -66,8 +66,9 @@ wayland_listener!(XdgV6ShellManager, Box<XdgV6ShellManagerHandler>, [
                         shell_surface.unmap_listener() as _);
         let events = with_handles!([(shell_surface: {shell_surface.surface_mut()})] => {
             match shell_surface.state() {
-                None | Some(&mut Popup(_)) => None,
-                Some(&mut TopLevel(ref mut toplevel)) => Some((*toplevel.as_ptr()).events)
+                None | Some(&mut Popup(_)) | Some(&mut PopupInert(_)) => None,
+                Some(&mut TopLevel(ref mut toplevel)) |
+                Some(&mut TopLevelInert(ref mut toplevel)) => Some((*toplevel.as_ptr()).events)
             }
         }).expect("Cannot borrow xdg shell surface");
         if let Some(mut events) = events {
