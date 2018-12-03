@@ -16,7 +16,6 @@ pub trait XdgShellHandler {
     fn on_commit(&mut self, CompositorHandle, SurfaceHandle, XdgShellSurfaceHandle) {}
 
     /// Called when the wayland shell is destroyed (e.g by the user)
-
     fn destroyed(&mut self, CompositorHandle, XdgShellSurfaceHandle) {}
 
     /// Called when the ping request timed out.
@@ -290,6 +289,9 @@ impl XdgShell {
 impl Drop for XdgShell {
     fn drop(&mut self) {
         unsafe {
+            ffi_dispatch!(WAYLAND_SERVER_HANDLE,
+                          wl_list_remove,
+                          &mut (*self.destroy_listener()).link as *mut _ as _);
             ffi_dispatch!(WAYLAND_SERVER_HANDLE,
                         wl_list_remove,
                         &mut (*self.commit_listener()).link as *mut _ as _);

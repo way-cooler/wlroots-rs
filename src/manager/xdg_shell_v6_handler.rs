@@ -292,6 +292,9 @@ impl Drop for XdgV6Shell {
         unsafe {
             ffi_dispatch!(WAYLAND_SERVER_HANDLE,
                           wl_list_remove,
+                          &mut (*self.destroy_listener()).link as *mut _ as _);
+            ffi_dispatch!(WAYLAND_SERVER_HANDLE,
+                          wl_list_remove,
                           &mut (*self.commit_listener()).link as *mut _ as _);
             ffi_dispatch!(WAYLAND_SERVER_HANDLE,
                           wl_list_remove,
