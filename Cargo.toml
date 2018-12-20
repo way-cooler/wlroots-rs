@@ -1,5 +1,5 @@
 [workspace]
-members = ["wlroots-sys", "wlroots-dehandle"]
+members = ["wlroots-sys", "wlroots-dehandle", "how-to-make-a-wayland-compositor"]
 
 [package]
 name = "wlroots"

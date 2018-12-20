@@ -1,0 +1,24 @@
+[package]
+name = "how-to-make-a-wayland-compositor"
+version = "0.2.0"
+description = "Book describing how to make a compositor with wlroots-rs. Includes example compositor."
+authors = ["Timidger <APragmaticPlace@gmail.com>"]
+# Explicitly waive all rights to this document, including the code samples inside.
+# This allows anyone to take what has been built here and use it as they see fit
+# whether that purpose is commercial or academic.
+license = "CC0"
+build = "build.rs"
+autobins = false
+
+[[bin]]
+name = "hello-world"
+path = "src/1-hello-world/main.rs"
+
+[dependencies]
+# There is intentionally only a dependency on wlroots, even though other libraries
+# are useful in building a compositor we only want to showcase what wlroots does.
+wlroots = { path = "..", features = ["unstable", "static"], version = "0.2.0" }
+
+[build-dependencies]
+# This is used to build the book which references the code in the example compositor.
+mdbook = { version = "0.2" }
