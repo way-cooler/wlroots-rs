@@ -1,47 +1,47 @@
-2018-12-20 14:19:55 - [wlroots-sys/wlroots/backend/wayland/backend.c:186] Creating wayland backend
-2018-12-20 14:19:55 - [wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: wl_data_device_manager v3
-2018-12-20 14:19:55 - [wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: wl_shm v1
-2018-12-20 14:19:55 - [wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: zwp_linux_dmabuf_v1 v3
-2018-12-20 14:19:55 - [wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: wl_drm v2
-2018-12-20 14:19:55 - [wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: zxdg_output_manager_v1 v2
-2018-12-20 14:19:55 - [wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: wl_compositor v4
-2018-12-20 14:19:55 - [wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: wl_subcompositor v1
-2018-12-20 14:19:55 - [wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: zxdg_shell_v6 v1
-2018-12-20 14:19:55 - [wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: xdg_wm_base v2
-2018-12-20 14:19:55 - [wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: wl_shell v1
-2018-12-20 14:19:55 - [wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: zwlr_layer_shell_v1 v1
-2018-12-20 14:19:55 - [wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: zwp_tablet_manager_v2 v1
-2018-12-20 14:19:55 - [wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: gamma_control_manager v1
-2018-12-20 14:19:55 - [wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: zwlr_gamma_control_manager_v1 v1
-2018-12-20 14:19:55 - [wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: orbital_screenshooter v1
-2018-12-20 14:19:55 - [wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: zwlr_export_dmabuf_manager_v1 v1
-2018-12-20 14:19:55 - [wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: org_kde_kwin_server_decoration_manager v1
-2018-12-20 14:19:55 - [wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: gtk_primary_selection_device_manager v1
-2018-12-20 14:19:55 - [wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: org_kde_kwin_idle v1
-2018-12-20 14:19:55 - [wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: zwp_idle_inhibit_manager_v1 v1
-2018-12-20 14:19:55 - [wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: zwlr_input_inhibit_manager_v1 v1
-2018-12-20 14:19:55 - [wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: zwp_input_method_manager_v2 v1
-2018-12-20 14:19:55 - [wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: zwp_text_input_manager_v3 v1
-2018-12-20 14:19:55 - [wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: zwp_virtual_keyboard_manager_v1 v1
-2018-12-20 14:19:55 - [wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: zwlr_screencopy_manager_v1 v1
-2018-12-20 14:19:55 - [wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: zxdg_decoration_manager_v1 v1
-2018-12-20 14:19:55 - [wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: zwp_pointer_constraints_v1 v1
-2018-12-20 14:19:55 - [wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: wp_presentation v1
-2018-12-20 14:19:55 - [wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: wl_output v3
-2018-12-20 14:19:55 - [wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: wl_seat v6
-2018-12-20 14:19:55 - [wlroots-sys/wlroots/backend/wayland/wl_seat.c:398] seat 0x7fb3a2235e10 offered pointer
-2018-12-20 14:19:55 - [wlroots-sys/wlroots/backend/wayland/wl_seat.c:411] seat 0x7fb3a2235e10 offered keyboard
-2018-12-20 14:19:55 - [wlroots-sys/wlroots/render/egl.c:149] Using EGL 1.4
-2018-12-20 14:19:55 - [wlroots-sys/wlroots/render/egl.c:150] Supported EGL extensions: EGL_ANDROID_blob_cache EGL_ANDROID_native_fence_sync EGL_EXT_buffer_age EGL_EXT_create_context_robustness EGL_EXT_image_dma_buf_import EGL_EXT_image_dma_buf_import_modifiers EGL_EXT_swap_buffers_with_damage EGL_IMG_context_priority EGL_KHR_config_attribs EGL_KHR_create_context EGL_KHR_create_context_no_error EGL_KHR_fence_sync EGL_KHR_get_all_proc_addresses EGL_KHR_gl_colorspace EGL_KHR_gl_renderbuffer_image EGL_KHR_gl_texture_2D_image EGL_KHR_gl_texture_3D_image EGL_KHR_gl_texture_cubemap_image EGL_KHR_image_base EGL_KHR_no_config_context EGL_KHR_reusable_sync EGL_KHR_surfaceless_context EGL_KHR_swap_buffers_with_damage EGL_EXT_pixel_format_float EGL_KHR_wait_sync EGL_MESA_configless_context EGL_MESA_drm_image EGL_MESA_image_dma_buf_export EGL_WL_bind_wayland_display EGL_WL_create_wayland_buffer_from_image 
-2018-12-20 14:19:55 - [wlroots-sys/wlroots/render/egl.c:151] EGL vendor: Mesa Project
-2018-12-20 14:19:55 - [wlroots-sys/wlroots/render/egl.c:97] Supported dmabuf buffer formats: AR30 XR30 AB30 XB30 AR24 AB24 XR24 XB24 AR15 RG16 R8   R16  GR88 GR32 YUV9 YU11 YU12 YU16 YU24 YVU9 YV11 YV12 YV16 YV24 NV12 NV16 YUYV UYVY 
-2018-12-20 14:19:55 - [wlroots-sys/wlroots/render/gles2/renderer.c:553] Using OpenGL ES 3.2 Mesa 18.3.1
-2018-12-20 14:19:55 - [wlroots-sys/wlroots/render/gles2/renderer.c:554] GL vendor: Intel Open Source Technology Center
-2018-12-20 14:19:55 - [wlroots-sys/wlroots/render/gles2/renderer.c:555] Supported GLES2 extensions: GL_EXT_blend_minmax GL_EXT_multi_draw_arrays GL_EXT_texture_filter_anisotropic GL_EXT_texture_compression_s3tc GL_EXT_occlusion_query_boolean GL_EXT_texture_compression_dxt1 GL_EXT_texture_format_BGRA8888 GL_OES_compressed_ETC1_RGB8_texture GL_OES_depth24 GL_OES_element_index_uint GL_OES_fbo_render_mipmap GL_OES_mapbuffer GL_OES_rgb8_rgba8 GL_OES_standard_derivatives GL_OES_stencil8 GL_OES_texture_3D GL_OES_texture_float GL_OES_texture_float_linear GL_OES_texture_half_float GL_OES_texture_half_float_linear GL_OES_texture_npot GL_OES_vertex_half_float GL_EXT_texture_sRGB_decode GL_OES_EGL_image GL_OES_depth_texture GL_OES_packed_depth_stencil GL_EXT_texture_type_2_10_10_10_REV GL_OES_get_program_binary GL_APPLE_texture_max_level GL_EXT_discard_framebuffer GL_EXT_read_format_bgra GL_EXT_frag_depth GL_NV_fbo_color_attachments GL_OES_EGL_image_external GL_OES_EGL_sync GL_OES_vertex_array_object GL_OES_viewport_array GL_ANGLE_texture_compression_dxt3 GL_ANGLE_texture_compression_dxt5 GL_EXT_robustness GL_EXT_texture_rg GL_EXT_unpack_subimage GL_NV_draw_buffers GL_NV_read_buffer GL_NV_read_depth GL_NV_read_depth_stencil GL_NV_read_stencil GL_EXT_draw_buffers GL_EXT_map_buffer_range GL_KHR_debug GL_KHR_robustness GL_KHR_texture_compression_astc_ldr GL_OES_depth_texture_cube_map GL_OES_required_internalformat GL_OES_surfaceless_context GL_EXT_color_buffer_float GL_EXT_separate_shader_objects GL_EXT_shader_framebuffer_fetch GL_EXT_shader_integer_mix GL_EXT_tessellation_point_size GL_EXT_tessellation_shader GL_INTEL_conservative_rasterization GL_INTEL_performance_query GL_ANDROID_extension_pack_es31a GL_EXT_base_instance GL_EXT_compressed_ETC1_RGB8_sub_texture GL_EXT_copy_image GL_EXT_draw_buffers_indexed GL_EXT_draw_elements_base_vertex GL_EXT_gpu_shader5 GL_EXT_polygon_offset_clamp GL_EXT_primitive_bounding_box GL_EXT_render_snorm GL_EXT_shader_io_blocks GL_EXT_texture_border_clamp GL_EXT_texture_buffer GL_EXT_texture_cube_map_array GL_EXT_texture_norm16 GL_KHR_blend_equation_advanced GL_KHR_blend_equation_advanced_coherent GL_KHR_context_flush_control GL_KHR_robust_buffer_access_behavior GL_NV_image_formats GL_OES_copy_image GL_OES_draw_buffers_indexed GL_OES_draw_elements_base_vertex GL_OES_gpu_shader5 GL_OES_primitive_bounding_box GL_OES_sample_shading GL_OES_sample_variables GL_OES_shader_io_blocks GL_OES_shader_multisample_interpolation GL_OES_tessellation_point_size GL_OES_tessellation_shader GL_OES_texture_border_clamp GL_OES_texture_buffer GL_OES_texture_cube_map_array GL_OES_texture_stencil8 GL_OES_texture_storage_multisample_2d_array GL_OES_texture_view GL_EXT_blend_func_extended GL_EXT_buffer_storage GL_EXT_geometry_point_size GL_EXT_geometry_shader GL_EXT_shader_samples_identical GL_KHR_no_error GL_KHR_texture_compression_astc_sliced_3d GL_NV_fragment_shader_interlock GL_OES_EGL_image_external_essl3 GL_OES_geometry_point_size GL_OES_geometry_shader GL_OES_shader_image_atomic GL_EXT_clip_cull_distance GL_EXT_disjoint_timer_query GL_MESA_shader_integer_functions GL_EXT_shader_framebuffer_fetch_non_coherent GL_MESA_framebuffer_flip_y 
-2018-12-20 14:19:55 - [src/compositor.rs:434] Running compositor on wayland display wayland-2
-2018-12-20 14:19:55 - [src/compositor.rs:497] Starting compositor
-2018-12-20 14:19:55 - [wlroots-sys/wlroots/backend/wayland/backend.c:104] Initializating wayland backend
-2018-12-20 14:19:55 - [GLES2] FS SIMD8 shader: 5 inst, 0 loops, 24 cycles, 0:0 spills:fills, Promoted 0 constants, compacted 80 to 48 bytes.
-2018-12-20 14:19:55 - [GLES2] FS SIMD16 shader: 5 inst, 0 loops, 34 cycles, 0:0 spills:fills, Promoted 0 constants, compacted 80 to 48 bytes.
-2018-12-20 14:19:55 - [GLES2] VS SIMD8 shader: 28 inst, 0 loops, 116 cycles, 0:0 spills:fills, Promoted 0 constants, compacted 448 to 336 bytes.
-2018-12-20 14:19:55 - [GLES2] FS SIMD16 shader: 2 inst, 0 loops, 0 cycles, 0:0 spills:fills, Promoted 0 constants, compacted 32 to 32 bytes.
+[wlroots-sys/wlroots/backend/wayland/backend.c:186] Creating wayland backend
+[wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: wl_data_device_manager v3
+[wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: wl_shm v1
+[wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: zwp_linux_dmabuf_v1 v3
+[wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: wl_drm v2
+[wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: zxdg_output_manager_v1 v2
+[wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: wl_compositor v4
+[wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: wl_subcompositor v1
+[wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: zxdg_shell_v6 v1
+[wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: xdg_wm_base v2
+[wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: wl_shell v1
+[wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: zwlr_layer_shell_v1 v1
+[wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: zwp_tablet_manager_v2 v1
+[wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: gamma_control_manager v1
+[wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: zwlr_gamma_control_manager_v1 v1
+[wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: orbital_screenshooter v1
+[wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: zwlr_export_dmabuf_manager_v1 v1
+[wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: org_kde_kwin_server_decoration_manager v1
+[wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: gtk_primary_selection_device_manager v1
+[wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: org_kde_kwin_idle v1
+[wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: zwp_idle_inhibit_manager_v1 v1
+[wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: zwlr_input_inhibit_manager_v1 v1
+[wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: zwp_input_method_manager_v2 v1
+[wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: zwp_text_input_manager_v3 v1
+[wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: zwp_virtual_keyboard_manager_v1 v1
+[wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: zwlr_screencopy_manager_v1 v1
+[wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: zxdg_decoration_manager_v1 v1
+[wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: zwp_pointer_constraints_v1 v1
+[wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: wp_presentation v1
+[wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: wl_output v3
+[wlroots-sys/wlroots/backend/wayland/backend.c:65] Remote wayland global: wl_seat v6
+[wlroots-sys/wlroots/backend/wayland/wl_seat.c:398] seat 0x7fb3a2235e10 offered pointer
+[wlroots-sys/wlroots/backend/wayland/wl_seat.c:411] seat 0x7fb3a2235e10 offered keyboard
+[wlroots-sys/wlroots/render/egl.c:149] Using EGL 1.4
+[wlroots-sys/wlroots/render/egl.c:150] Supported EGL extensions: EGL_ANDROID_blob_cache EGL_ANDROID_native_fence_sync EGL_EXT_buffer_age EGL_EXT_create_context_robustness EGL_EXT_image_dma_buf_import EGL_EXT_image_dma_buf_import_modifiers EGL_EXT_swap_buffers_with_damage EGL_IMG_context_priority EGL_KHR_config_attribs EGL_KHR_create_context EGL_KHR_create_context_no_error EGL_KHR_fence_sync EGL_KHR_get_all_proc_addresses EGL_KHR_gl_colorspace EGL_KHR_gl_renderbuffer_image EGL_KHR_gl_texture_2D_image EGL_KHR_gl_texture_3D_image EGL_KHR_gl_texture_cubemap_image EGL_KHR_image_base EGL_KHR_no_config_context EGL_KHR_reusable_sync EGL_KHR_surfaceless_context EGL_KHR_swap_buffers_with_damage EGL_EXT_pixel_format_float EGL_KHR_wait_sync EGL_MESA_configless_context EGL_MESA_drm_image EGL_MESA_image_dma_buf_export EGL_WL_bind_wayland_display EGL_WL_create_wayland_buffer_from_image 
+[wlroots-sys/wlroots/render/egl.c:151] EGL vendor: Mesa Project
+[wlroots-sys/wlroots/render/egl.c:97] Supported dmabuf buffer formats: AR30 XR30 AB30 XB30 AR24 AB24 XR24 XB24 AR15 RG16 R8   R16  GR88 GR32 YUV9 YU11 YU12 YU16 YU24 YVU9 YV11 YV12 YV16 YV24 NV12 NV16 YUYV UYVY 
+[wlroots-sys/wlroots/render/gles2/renderer.c:553] Using OpenGL ES 3.2 Mesa 18.3.1
+[wlroots-sys/wlroots/render/gles2/renderer.c:554] GL vendor: Intel Open Source Technology Center
+[wlroots-sys/wlroots/render/gles2/renderer.c:555] Supported GLES2 extensions: GL_EXT_blend_minmax GL_EXT_multi_draw_arrays GL_EXT_texture_filter_anisotropic GL_EXT_texture_compression_s3tc GL_EXT_occlusion_query_boolean GL_EXT_texture_compression_dxt1 GL_EXT_texture_format_BGRA8888 GL_OES_compressed_ETC1_RGB8_texture GL_OES_depth24 GL_OES_element_index_uint GL_OES_fbo_render_mipmap GL_OES_mapbuffer GL_OES_rgb8_rgba8 GL_OES_standard_derivatives GL_OES_stencil8 GL_OES_texture_3D GL_OES_texture_float GL_OES_texture_float_linear GL_OES_texture_half_float GL_OES_texture_half_float_linear GL_OES_texture_npot GL_OES_vertex_half_float GL_EXT_texture_sRGB_decode GL_OES_EGL_image GL_OES_depth_texture GL_OES_packed_depth_stencil GL_EXT_texture_type_2_10_10_10_REV GL_OES_get_program_binary GL_APPLE_texture_max_level GL_EXT_discard_framebuffer GL_EXT_read_format_bgra GL_EXT_frag_depth GL_NV_fbo_color_attachments GL_OES_EGL_image_external GL_OES_EGL_sync GL_OES_vertex_array_object GL_OES_viewport_array GL_ANGLE_texture_compression_dxt3 GL_ANGLE_texture_compression_dxt5 GL_EXT_robustness GL_EXT_texture_rg GL_EXT_unpack_subimage GL_NV_draw_buffers GL_NV_read_buffer GL_NV_read_depth GL_NV_read_depth_stencil GL_NV_read_stencil GL_EXT_draw_buffers GL_EXT_map_buffer_range GL_KHR_debug GL_KHR_robustness GL_KHR_texture_compression_astc_ldr GL_OES_depth_texture_cube_map GL_OES_required_internalformat GL_OES_surfaceless_context GL_EXT_color_buffer_float GL_EXT_separate_shader_objects GL_EXT_shader_framebuffer_fetch GL_EXT_shader_integer_mix GL_EXT_tessellation_point_size GL_EXT_tessellation_shader GL_INTEL_conservative_rasterization GL_INTEL_performance_query GL_ANDROID_extension_pack_es31a GL_EXT_base_instance GL_EXT_compressed_ETC1_RGB8_sub_texture GL_EXT_copy_image GL_EXT_draw_buffers_indexed GL_EXT_draw_elements_base_vertex GL_EXT_gpu_shader5 GL_EXT_polygon_offset_clamp GL_EXT_primitive_bounding_box GL_EXT_render_snorm GL_EXT_shader_io_blocks GL_EXT_texture_border_clamp GL_EXT_texture_buffer GL_EXT_texture_cube_map_array GL_EXT_texture_norm16 GL_KHR_blend_equation_advanced GL_KHR_blend_equation_advanced_coherent GL_KHR_context_flush_control GL_KHR_robust_buffer_access_behavior GL_NV_image_formats GL_OES_copy_image GL_OES_draw_buffers_indexed GL_OES_draw_elements_base_vertex GL_OES_gpu_shader5 GL_OES_primitive_bounding_box GL_OES_sample_shading GL_OES_sample_variables GL_OES_shader_io_blocks GL_OES_shader_multisample_interpolation GL_OES_tessellation_point_size GL_OES_tessellation_shader GL_OES_texture_border_clamp GL_OES_texture_buffer GL_OES_texture_cube_map_array GL_OES_texture_stencil8 GL_OES_texture_storage_multisample_2d_array GL_OES_texture_view GL_EXT_blend_func_extended GL_EXT_buffer_storage GL_EXT_geometry_point_size GL_EXT_geometry_shader GL_EXT_shader_samples_identical GL_KHR_no_error GL_KHR_texture_compression_astc_sliced_3d GL_NV_fragment_shader_interlock GL_OES_EGL_image_external_essl3 GL_OES_geometry_point_size GL_OES_geometry_shader GL_OES_shader_image_atomic GL_EXT_clip_cull_distance GL_EXT_disjoint_timer_query GL_MESA_shader_integer_functions GL_EXT_shader_framebuffer_fetch_non_coherent GL_MESA_framebuffer_flip_y 
+[src/compositor.rs:434] Running compositor on wayland display wayland-2
+[src/compositor.rs:497] Starting compositor
+[wlroots-sys/wlroots/backend/wayland/backend.c:104] Initializating wayland backend
+[GLES2] FS SIMD8 shader: 5 inst, 0 loops, 24 cycles, 0:0 spills:fills, Promoted 0 constants, compacted 80 to 48 bytes.
+[GLES2] FS SIMD16 shader: 5 inst, 0 loops, 34 cycles, 0:0 spills:fills, Promoted 0 constants, compacted 80 to 48 bytes.
+[GLES2] VS SIMD8 shader: 28 inst, 0 loops, 116 cycles, 0:0 spills:fills, Promoted 0 constants, compacted 448 to 336 bytes.
+[GLES2] FS SIMD16 shader: 2 inst, 0 loops, 0 cycles, 0:0 spills:fills, Promoted 0 constants, compacted 32 to 32 bytes.

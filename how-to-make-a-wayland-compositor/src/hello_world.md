@@ -37,7 +37,7 @@ Because no callbacks were set up the compositor will just keep running forever d
 This example is a little silly, but it highlights just how much needs to be implemented -- our compositor can't even shut itself off.
 
 ---
-<sup>1</sup>If you are running on a system with systemd and have the feature enabled (it is by default) it should "just work" for your user. If not, you'll need set the setuid bit on the binary `chmod u+s`
+<sup>1</sup> If you are running on a system with systemd and have the feature enabled (it is by default) it should "just work" for your user. If not, you'll need set the setuid bit on the binary `chmod u+s`
 
-<sup>2</sup>This is a wlroots feature that is built into the `build_auto` function. It is very useful for debugging.
+<sup>2</sup> This is a wlroots feature that is built into the `build_auto` function. It is very useful for debugging.
 

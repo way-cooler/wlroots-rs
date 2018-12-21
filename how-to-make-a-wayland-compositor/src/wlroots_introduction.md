@@ -43,4 +43,4 @@ Here is the elevator pitch for wlroots, taken straight from their README:
 
 ---
 
-<sup>1</sup>It is written in C, but there are [safe Rust bindings](https://github.com/swaywm/wlroots-rs) written by me which is what will be used. The only thing the Rust library adds is memory safety and some more structure to the library. All the real features are implemented in wlroots, and if you want you can easily convert this Rust code back to C.
+<sup>1</sup> It is written in C, but there are [safe Rust bindings](https://github.com/swaywm/wlroots-rs) written by me which is what will be used. The only thing the Rust library adds is memory safety and some more structure to the library. All the real features are implemented in wlroots, and if you want you can easily convert this Rust code back to C.
