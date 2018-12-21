@@ -5,3 +5,4 @@
 - [Hello World](hello_world.md)
   - [Analyzing the code](hello_world_analyze.md)
   - [Analyzing the Wayland protocol](hello_world_output.md)
+  - [Exercises](hello_world_exercises.md)
