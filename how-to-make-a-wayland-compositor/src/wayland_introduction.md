@@ -19,11 +19,11 @@ If there's one thing you learn from this book, it's this:
 
 [This is required reading before you proceed.](https://wayland.freedesktop.org/architecture.html) (feel free to ignore the hardware and rendering sections, focus on the diagrams).
 
-In X11 there are two main components that are normally used to make a functioning system: the xserver and a window manager (which acts as a client to the xserver). Technically all you need is the xserver, but the window manager helps make it usable. Most variations of X11 systems are simply swapping out what the window manager is. For example, Gnome, KDE, i3, and AwesomeWM are all examples of very different ways to build a functioning X11 system. Across all of these, they will use the same xserver.
+In X11 there are two main components that are normally used to make a functioning system: the xserver and a window manager (which is just a client to the xserver). Technically all you need is the xserver, but the window manager helps make it usable. Most variations of X11 systems are simply swapping out what the window manager is. For example, Gnome, KDE, i3, and AwesomeWM are all examples of very different ways to build a functioning X11 system. Across all of these, they generally will use the same xserver.
 
-A Wayland compositor is like a window manager and the xserver bundled into one. Like in X11 it is in charged of putting other windows in their proper place, but unlike X11 _only_ the compositor has the power to do this. In X11 a window manager is no more privileged than any other client. In Wayland the compositor is master and the clients are the slaves.  There is a reference compositor called [Weston](https://gitlab.freedesktop.org/wayland/weston) written in C.
+A Wayland compositor is like a window manager and the xserver bundled into one. Like in X11 it is in charged of putting other windows in their proper place, but unlike X11 _only_ the compositor has the power to do this. In X11 a window manager is no more privileged than any other client. In Wayland the compositor is the master and the clients are the slaves.
 
-Here is a list of compositors that will be referenced later in this book with a brief description:
+Here is a list of compositors that will be referenced later in this book:
 * [Way Cooler](http://way-cooler.org)
   - Written by me, Preston Carpenter. It was the first Wayland compositor written in Rust.
 * [Fireplace](https://github.com/Drakulix/fireplace)
