@@ -38,6 +38,6 @@ Here is a list of compositors that will be referenced later in this book with a 
 These compositors will be mentioned either because I know them well enough to draw experience and stories from in order to help educate you (such as in Way Cooler's case), because they are doing something unique (in Fireplace's case) or because they made historically or politically significant decisions that have impacted the ecosystem (Sway, Mutter, and KWin).
 
 ## Prerequisites to reading this book
-You should know how to program in Rust.
+You should know how to program in Rust. You should have the latest stable version of Rust, any edition.
 
 You should also be able to read C. Even though there will be no C in this book most of the Wayland ecosystem, including the reference implementation and wlroots (the framework we will be using), is written in C.
