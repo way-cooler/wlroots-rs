@@ -37,7 +37,7 @@ Lets see what globals are being advertised by our compositor:
 ```
 {{#include 1-hello-world/weston_info_output.txt}}```
 
-`weston-info` prints out the name of each exposed interface on a new line along with the advertised interface version and the relative, atomically increasing index (confusingly prepended with "name").
+`weston-info` prints out the name of each exposed interface on a new line along with the highest advertised interface version and the relative, atomically increasing index (confusingly prepended with "name").
 
 `wl_compositor` and `wl_subcompositor` are both standard Wayland interfaces. `wl_subcompositor` is automatically started by wlroots when a `wl_compositor` is used. A `wl_compositor` is the base global that all clients depend on. From this global a client can create a `wl_surface` and a `wl_region`.
 
