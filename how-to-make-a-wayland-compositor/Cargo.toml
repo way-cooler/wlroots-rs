@@ -14,6 +14,10 @@ autobins = false
 name = "hello-world"
 path = "src/1-hello-world/main.rs"
 
+[[bin]]
+name = "goodbye-world"
+path = "src/2-goodbye-world/main.rs"
+
 [dependencies]
 # There is intentionally only a dependency on wlroots, even though other libraries
 # are useful in building a compositor we only want to showcase what wlroots does.
