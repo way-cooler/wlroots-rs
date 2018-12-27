@@ -1,0 +1,2 @@
+interface: 'wl_compositor', version: 4, name: 1
+interface: 'wl_subcompositor', version: 1, name: 2
