@@ -1,6 +1,6 @@
 # How to Make a Wayland Compositor (in Rust)
 ## What is Wayland?
-Wayland is the replacement for the X Window System, colloquially known as X11. 
+Wayland is the replacement for the X Window System, colloquially known as X11.
 
 Similar to how the most popular implementation of X11 is XOrg the most popular version of Wayland is the reference implementation. Other versions exist, including one [written in Rust](https://github.com/Smithay/wayland-rs).
 
