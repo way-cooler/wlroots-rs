@@ -3,26 +3,22 @@ extern crate wlroots;
 use wlroots::{compositor,
               input::{self, keyboard},
               utils::log::{WLR_DEBUG, init_logging},
-              xkbcommon::xkb::keysyms
-};
+              xkbcommon::xkb::keysyms};
 
 fn main() {
     init_logging(WLR_DEBUG, None);
+    let input_builder = input::manager::Builder::default()
+        .keyboard_added(keyboard_added);
     compositor::Builder::new()
-        .input_manager(Box::new(InputManager))
+        .input_manager(input_builder)
         .build_auto(())
         .run()
 }
 
-struct InputManager;
-
-impl input::ManagerHandler for InputManager {
-    fn keyboard_added(&mut self,
-                      _compositor_handle: compositor::Handle,
-                      _keyboard_handle: keyboard::Handle)
-                      -> Option<Box<keyboard::Handler>> {
-        Some(Box::new(KeyboardHandler))
-    }
+fn keyboard_added(_compositor_handle: compositor::Handle,
+                  _keyboard_handle: keyboard::Handle)
+                  -> Option<Box<keyboard::Handler>> {
+    Some(Box::new(KeyboardHandler))
 }
 
 struct KeyboardHandler;
