@@ -1,8 +1,9 @@
 # Analyzing the Wayland protocol
-This is the log output from our compositor:
+This is the log output from our compositor when it's ran as a nested Wayland instance:
 
 ```
-{{#include 1-hello-world/sample_output.txt}} ```
+{{#include 1-hello-world/sample_output.txt}} 
+```
 
 Your output will probably not match exactly, but it should roughly have this output.
 
@@ -35,7 +36,8 @@ In the log output it prints out the `$WAYLAND_DISPLAY`:
 Lets see what globals are being advertised by our compositor:
 
 ```
-{{#include 1-hello-world/weston_info_output.txt}}```
+{{#include 1-hello-world/weston_info_output.txt:1:2}}
+```
 
 `weston-info` prints out the name of each exposed interface on a new line along with the highest advertised interface version and the relative, atomically increasing index (confusingly prepended with "name").
 
@@ -43,9 +45,9 @@ Lets see what globals are being advertised by our compositor:
 
 A `wl_surface` is a basic building block for drawing and rendering contents to the screen in Wayland. A client needs more than a `wl_surface` in order to render to the screen, but that is the basic object a compositor needs in order to render.<sup>3</sup>
 
-A `wl_region` is the object that allows clients to tell the compositor where, in surface level coordinates<sup>4</sup>, it wants to handle input and where it is rendering content. Where it wants input is very important, but the default is that it accepts input everywhere in the surface. Specifying an area where the client is rendering content is important because it allows the compositor to know that any content behind that doesn't need to be redrawn. As a very simple example of this if there is a moving background on the screen and there is a fullscreen window then there is no need to draw the background.
+A `wl_region` is the object that allows clients to tell the compositor where, in surface level coordinates<sup>4</sup>, it wants to handle input and where it is rendering content. Where it wants input is very important, but the default is that it accepts input everywhere in the surface. Specifying an area where the client is rendering content is important because it allows the compositor to know that any content behind that doesn't need to be redrawn. As a very simple example of this if there is a moving background on the screen and there is a fullscreen window then there is no need to draw the background saving precious cycles.
 
-The ability to specify only parts of the screen to update is a major feature of Wayland which will be totally ignored until a much later chapter. When starting out it's simple enough to simply redraw the entire screen each time a new frame is available. For non-toy compositors though it is vital that proper damage tracking (as the feature is often called) is implemented. It reduces power consumption and makes the compositor faster.
+The ability to specify only parts of the screen to update is a major feature of Wayland which will be totally ignored until a much later chapter. When starting out it's simple enough to simply redraw the entire screen each time a new frame is available. For non-toy compositors though it is vital that proper damage tracking (as the feature is called) is implemented. It reduces power consumption and makes the compositor faster.
 
 ## Seat offerings
 ```
@@ -78,6 +80,6 @@ Everything after these lines, including these lines, is printed to the log after
 
 <sup>2</sup> In most Linux distributions this utility is packaged along with weston, the reference Wayland compositor.
 
-<sup>3</sup> What a shell adds to a `wl_surface` is _context_. Without the proper context a compositor doesn't know if the surface it was just handed by the client is a standalone window, a popup, a background, a status bar, or a cursor to be rendered. All of them need to be handled differently and they are all handled using a dedicated wayland "shell" or a specialized non-shell protocol.
+<sup>3</sup> Usually a surface is wrapped in a shell. What a shell adds to a `wl_surface` is _context_. Without the proper context a compositor doesn't know if the surface it was just handed by the client is a standalone window, a popup, a background, a status bar, or a cursor to be rendered. All of them need to be handled differently and they are all handled using a dedicated wayland "shell" or a specialized non-shell protocol.
 
 <sup>4</sup> It has to be surface level because clients doesn't know about anything but the content it renders.

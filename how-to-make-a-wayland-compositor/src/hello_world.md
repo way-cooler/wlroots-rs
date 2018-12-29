@@ -1,5 +1,5 @@
 # Hello World
-Each chapter's code contents will have its own folder with a name prefixed by the chapter number. For example, this chapter's code is stored in `1-hello-world/`. The code can be found [here](https://github.com/swaywm/wlroots-rs/tree/master/how-to-make-a-wayland-compositor/src/).
+Each chapter's code contents will have its own folder with a name prefixed by the chapter number. For example, this chapter's code is stored in `1-hello-world/`. The code can be found [here](https://github.com/swaywm/wlroots-rs/tree/book/how-to-make-a-wayland-compositor/src/).
 
 The only dependency used, apart from the standard library, will be wlroots. A more useful compositor will want to use other libraries, but it is not done here in order to avoid choosing favorites while also being self contained and complete.
 
@@ -21,6 +21,8 @@ The `"unstable"` feature flag enables the wlroots features whose API hasn't stab
 
 The `"static"` feature flag statically links the wlroots library to the binary. This is optional, but encouraged since there's no stable ABI guarantee and it makes it easier to distribute the compositor to others.
 
+Because the library is changing constantly however, it is suggested you add it as a git submodule to your project instead of using crates.io.
+
 ## A minimal compositor
 
 Here is the smallest, simplest compositor you can make with wlroots:
@@ -30,9 +32,9 @@ Here is the smallest, simplest compositor you can make with wlroots:
 
 This compositor is useless. In fact, it's dangerously useless. However it's also very instructive considering how short it is.
 
-You can compile and run<sup>1</sup> the above in any existing X11 window manager or Wayland compositor and it will run in a nested window.<sup>2</sup> However if you run it in a separate TTY it will use the DRM backend. This is usually the backend that will be used when you're not testing the compositor. If you run it on DRM, you can't escape the compositor.
+You can compile and run<sup>1</sup> the above in any existing X11 window manager or Wayland compositor and it will run in a nested window.<sup>2</sup> However if you run it in a separate TTY it will use the DRM backend. This is usually the backend that will be used when you're not testing the compositor. If you run this code on DRM, you can't escape the compositor. If you do this you will need to reboot to escape.
 
-Because no callbacks were set up for the events the compositor will just keep running forever doing nothing. If you run this in DRM, you need to reboot your computer to escape. You can't even switch TTYs because that's a feature that the compositor needs to implement itself.
+Because no callbacks were set up for the events the compositor will just keep running forever doing nothing. You can't even switch TTYs because that's a feature that the compositor needs to implement itself.
 
 This example is a little silly, but it highlights just how much needs to be implemented -- our compositor can't even shut itself off.
 
