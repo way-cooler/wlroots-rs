@@ -44,9 +44,16 @@ Here is a list of compositors that will be referenced later in this book:
 * [mutter](https://gitlab.gnome.org/GNOME/mutter)
   - The Gnome Wayland compositor, is the direct continuation of the X11 Gnome desktop (which is deprecated).
 
-These compositors will be mentioned either because I know them well enough to draw experience and stories from in order to help educate you (such as in Way Cooler's case), because they are doing something unique (in Fireplace's case) or because they made meaningful or politically significant decisions that have impacted the ecosystem (sway, mutter, and KWin).
+These compositors will be mentioned either because I know them well enough to
+draw experience and stories from in order to help educate you (such as in Way
+Cooler's case), because they are doing something unique (in Fireplace's case) or
+because they made meaningful or politically significant decisions that have
+impacted the ecosystem (sway, mutter, and KWin).
 
 ## Prerequisites for understanding reading this book
-You should know how to program in Rust. You should have the latest stable version of Rust, any edition.
+You should know how to program in Rust. You should have the latest stable 
+version of Rust, any edition.
 
-You should also be able to read C. Even though there will be no C in this book most of the Wayland ecosystem, including the reference implementation and wlroots (the framework we will be using), is written in C.
+You should also be able to read C. Even though there will be no C in this book 
+most of the Wayland ecosystem, including the reference implementation and
+wlroots (the framework we will be using), is written in C.
