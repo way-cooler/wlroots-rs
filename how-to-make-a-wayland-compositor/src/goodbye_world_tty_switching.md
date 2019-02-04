@@ -40,9 +40,13 @@ handles.
 > [with_handles](http://way-cooler.org/docs/wlroots/macro.with_handles.html)
 > and [wlroots_dehandle](http://way-cooler.org/docs/wlroots_dehandle/macro.wlroots_dehandle.html).
 > Either, or neither, can be used. They are only implemented as a convenience.
-> However, they will be used later in this book so you should learn them now.
 >
-> Please read [the handle documentation in order to better understand Handles](http://way-cooler.org/docs/wlroots/utils/struct.Handle.html).
+> However, `wlroots_dehandle` will be used later in this book since it is the
+> most convenient way to use handles. [So please read its
+> documentation](http://way-cooler.org/docs/wlroots_dehandle/macro.wlroots_dehandle.html).
+>
+> Please read [the handle documentation in order to better understand
+> Handles](http://way-cooler.org/docs/wlroots/utils/struct.Handle.html).
 
 ## Accessing the Session from the Compositor
 
