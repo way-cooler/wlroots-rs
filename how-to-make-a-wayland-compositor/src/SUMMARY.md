@@ -10,3 +10,4 @@
   - [A graceful shutdown](goodbye_world_shutdown.md)
   - [TTY switching](goodbye_world_tty_switching.md)
   - [Exercises](goodbye_world_exercises.md)
+- [Getting to the point](getting_to_the_point.md)

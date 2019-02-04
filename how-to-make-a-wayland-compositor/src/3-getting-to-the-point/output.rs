@@ -14,15 +14,16 @@ pub fn output_added<'output>(compositor: compositor::Handle,
     {
         #[dehandle] let compositor = compositor;
         #[dehandle] let output = &result.output;
-        let &mut CompositorState { output_layout: ref output_layout_handle,
-                                   ref cursor_handle,
-                                   ref mut xcursor_manager } =
-            compositor.data.downcast_mut().unwrap();
-        #[dehandle] let output_layout = output_layout_handle;
+        let CompositorState { ref output_layout,
+                              ref cursor_handle,
+                              ref mut xcursor_manager } =
+            compositor.downcast();
+        #[dehandle] let output_layout = output_layout;
         #[dehandle] let cursor = cursor_handle;
-        output_layout.add_auto(output);
-        cursor.attach_output_layout(output_layout);
+        //output_layout.add_auto(output);
+        //cursor.attach_output_layout(output_layout);
         xcursor_manager.load(1.0);
+        let output_cursor = wlroots::output::Cursor::new(output);
         xcursor_manager.set_cursor_image("left_ptr".to_string(), cursor);
         let (x, y) = cursor.coords();
         cursor.warp(None, x, y);
