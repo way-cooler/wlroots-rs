@@ -8,6 +8,8 @@ see that it doesn't work so we need to use `wlr_output` and `wlr_output_cursor`.
 But then in the next section show that it doesn't handle multiple outputs and
 other things very well.
 
+Maybe this should be two chapters...
+
 # Getting to the Point
 Now that the compositor can be started stopped successfully, it's about time
 that it actually starts doing what it's designed to do: composite some stuff.
