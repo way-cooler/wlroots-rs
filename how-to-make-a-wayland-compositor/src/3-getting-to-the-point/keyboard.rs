@@ -1,4 +1,4 @@
-use wlroots::{compositor,
+use wlroots::{wlroots_dehandle, compositor,
               input::keyboard,
               xkbcommon::xkb::keysyms,
               wlr_key_state::WLR_KEY_PRESSED};
@@ -16,6 +16,7 @@ struct KeyboardHandler {
 }
 
 impl keyboard::Handler for KeyboardHandler {
+    #[wlroots_dehandle]
     fn on_key(&mut self,
               compositor_handle: compositor::Handle,
               _keyboard_handle: keyboard::Handle,
@@ -32,12 +33,11 @@ impl keyboard::Handler for KeyboardHandler {
                     }
                 },
                 keysyms::KEY_XF86Switch_VT_1 ..= keysyms::KEY_XF86Switch_VT_12 => {
-                    compositor_handle.run(|compositor| {
-                        let backend = compositor.backend_mut();
-                        if let Some(mut session) = backend.get_session() {
-                            session.change_vt(key - keysyms::KEY_XF86Switch_VT_1 + 1);
-                        }
-                    }).unwrap();
+                    #[dehandle] let compositor = compositor_handle;
+                    let backend = compositor.backend_mut();
+                    if let Some(mut session) = backend.get_session() {
+                        session.change_vt(key - keysyms::KEY_XF86Switch_VT_1 + 1);
+                    }
                 }
                 _ => { /* Do nothing */ }
             }

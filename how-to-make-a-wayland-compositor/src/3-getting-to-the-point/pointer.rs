@@ -6,7 +6,6 @@ use CompositorState;
 
 pub struct PointerHandler;
 
-#[wlroots_dehandle]
 pub fn pointer_added(_compositor_handle: compositor::Handle,
                      _pointer_handle: pointer::Handle)
                      -> Option<Box<pointer::Handler>> {

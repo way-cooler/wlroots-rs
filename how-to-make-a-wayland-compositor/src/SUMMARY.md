@@ -11,3 +11,5 @@
   - [TTY switching](goodbye_world_tty_switching.md)
   - [Exercises](goodbye_world_exercises.md)
 - [Getting to the point](getting_to_the_point.md)
+  - [Using `wlroots::output::Cursor`](using_output_cursor.md)
+  - [Using `wlroots::cursor::Cursor`](using_real_cursor.md)
