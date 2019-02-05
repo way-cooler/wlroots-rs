@@ -4,26 +4,25 @@ mod keyboard;
 mod pointer;
 mod output;
 
-use pointer::{pointer_added, init_cursor};
+use pointer::pointer_added;
 use keyboard::keyboard_added;
-use output::{output_added, create_output_layout};
+use output::output_added;
 
 use wlroots::{compositor,
-              cursor::{self, xcursor},
+              cursor::xcursor,
               utils::log::{WLR_DEBUG, init_logging}};
 
 pub struct CompositorState {
-    xcursor_manager: xcursor::Manager,
-    cursor_handle: cursor::Handle,
-    output_layout: wlroots::output::layout::Handle
+    theme: xcursor::Theme,
+    cursor: Option<wlroots::output::Cursor>
 }
 
 fn main() {
     init_logging(WLR_DEBUG, None);
-    let (xcursor_manager, cursor_handle) = init_cursor();
+    let theme = xcursor::Theme::load_theme(None, 16)
+        .expect("Could not create xcursor manager");
     let output_builder = wlroots::output::manager::Builder::default()
         .output_added(output_added);
-    let output_layout = create_output_layout();
     let input_builder = wlroots::input::manager::Builder::default()
         .pointer_added(pointer_added)
         .keyboard_added(keyboard_added);
@@ -31,9 +30,6 @@ fn main() {
         .gles2(true)
         .input_manager(input_builder)
         .output_manager(output_builder)
-        .build_auto(CompositorState { xcursor_manager,
-                                      cursor_handle,
-                                      output_layout }
-        );
+        .build_auto(CompositorState { theme, cursor: None });
     compositor.run();
 }
