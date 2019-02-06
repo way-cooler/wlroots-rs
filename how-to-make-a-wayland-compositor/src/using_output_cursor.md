@@ -1,1 +1,0 @@
-# Using wlroots::output::Cursor

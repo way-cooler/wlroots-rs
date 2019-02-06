@@ -6,12 +6,6 @@ use CompositorState;
 
 pub struct PointerHandler;
 
-pub fn pointer_added(_compositor_handle: compositor::Handle,
-                     _pointer_handle: pointer::Handle)
-                     -> Option<Box<pointer::Handler>> {
-    Some(Box::new(PointerHandler))
-}
-
 impl pointer::Handler for PointerHandler {
     #[wlroots_dehandle]
     fn on_motion(&mut self,
@@ -27,4 +21,11 @@ impl pointer::Handler for PointerHandler {
                 .expect("Could not move cursor");
         }
     }
+}
+
+
+pub fn pointer_added(_compositor_handle: compositor::Handle,
+                     _pointer_handle: pointer::Handle)
+                     -> Option<Box<pointer::Handler>> {
+    Some(Box::new(PointerHandler))
 }

@@ -4,6 +4,8 @@ use CompositorState;
 
 struct OutputHandler;
 
+impl output::Handler for OutputHandler {}
+
 #[wlroots_dehandle]
 pub fn output_added<'output>(compositor: compositor::Handle,
                              builder: output::Builder<'output>)
@@ -17,12 +19,11 @@ pub fn output_added<'output>(compositor: compositor::Handle,
             .expect("Could not create output cursor");
         let xcursor = state.theme.get_cursor("left_ptr".into())
             .expect("Could not load default cursor set");
-        let image: wlroots::render::Image = xcursor.image(0).expect("xcursor had no images").into();
+        let image: wlroots::render::Image = xcursor.image(0)
+            .expect("xcursor had no images").into();
         cursor.set_image(&image)
             .expect("Could not set cursor image");
         state.cursor = Some(cursor);
     }
     Some(result)
 }
-
-impl output::Handler for OutputHandler {}
