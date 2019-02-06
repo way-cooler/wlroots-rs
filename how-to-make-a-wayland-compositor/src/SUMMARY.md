@@ -13,3 +13,4 @@
 - [Getting to the point](getting_to_the_point.md)
   - [A basic cursor](basic_output_cursor.md)
   - [A better cursor](wlr_cursor.md)
+  - [Exercises](getting_to_the_point_exercises.md)
