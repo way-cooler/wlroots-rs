@@ -17,15 +17,22 @@ abstracts over all types of common mouse input<sup>2</sup>, courtesy of libinput
 Like Keyboard, a Pointer is instantiated using the input builder:
 
 ```rust
-{{#include 3-getting-to-the-point/pointer.rs:7:9}}
+struct PointerHandler;
+
+impl pointer::Handler for PointerHandler {
     // By default, all events are ignored
 }
 
-{{#include 3-getting-to-the-point/pointer.rs:27:31}}
+fn pointer_added(_compositor_handle: compositor::Handle,
+                     _pointer_handle: pointer::Handle)
+                     -> Option<Box<pointer::Handler>> {
+    Some(Box::new(PointerHandler))
+}
 
 
 fn main() {
-{{#include 3-getting-to-the-point/main.rs:26:27}}
+    let input_builder = wlroots::input::manager::Builder::default()
+        .pointer_added(pointer_added)
     // Other setup elided...
 }
 ```
@@ -57,19 +64,23 @@ determined.
 The coordinates can be stored in the `PointerHandler` and updated on each event:
 
 ```rust
-pub struct PointerHandler {
+struct PointerHandler {
     /// The x coordinate in relation to the output.
     ox: f64,
     /// The y coordinate in relation to the output.
     oy: f64
 }
 
-{{#include 3-getting-to-the-point/pointer.rs:9}}
-{{#include 3-getting-to-the-point/pointer.rs:11:14}}
+impl pointer::Handler for PointerHandler {
+    fn on_motion(&mut self,
+                 compositor_handle: compositor::Handle,
+                 _pointer_handle: pointer::Handle,
+                 motion_event: &pointer::event::Motion) {
         let (delta_x, delta_y) = motion_event.delta();
         self.x += delta_x;
         self.y += delta_y;
-{{#include 3-getting-to-the-point/pointer.rs:23:24}}
+    }
+}
 ```
 
 
@@ -102,15 +113,23 @@ rendered on to.
 Setting up an output is done in the same as setting up an input:
 
 ```rust
-{{#include 3-getting-to-the-point/output.rs:5:7}}
+struct OutputHandler;
 
-{{#include 3-getting-to-the-point/output.rs:10:12}}
+impl output::Handler for OutputHandler {}
+
+fn output_added<'output>(compositor: compositor::Handle,
+                             builder: output::Builder<'output>)
+                             -> Option<output::BuilderResult<'output>> {
     Some(builder.build_best_mode(OutputHandler))
 }
 
 fn main() {
-{{#include 3-getting-to-the-point/main.rs:24:25}}
-{{#include 3-getting-to-the-point/main.rs:29:32}}
+    let output_builder = wlroots::output::manager::Builder::default()
+        .output_added(output_added);
+    let compositor = compositor::Builder::new()
+        .gles2(true)
+        .input_manager(input_builder)
+        .output_manager(output_builder)
 }
 ```
 
@@ -125,11 +144,79 @@ cursor around the screen without redrawing anything underneath it.
 Using this new type this is a basic cursor implementation with wlroots:
 
 ```rust
-{{#include 3-getting-to-the-point/output.rs:5:}}
+struct OutputHandler;
 
-{{#include 3-getting-to-the-point/pointer.rs:7:}}
+impl output::Handler for OutputHandler {}
 
-{{#include 3-getting-to-the-point/main.rs:15:}}
+#[wlroots_dehandle]
+fn output_added<'output>(compositor: compositor::Handle,
+                             builder: output::Builder<'output>)
+                             -> Option<output::BuilderResult<'output>> {
+    let result = builder.build_best_mode(OutputHandler);
+    {
+        #[dehandle] let compositor = compositor;
+        #[dehandle] let output = &result.output;
+        let state: &mut CompositorState = compositor.downcast();
+        let mut cursor = output::Cursor::new(output)
+            .expect("Could not create output cursor");
+        let xcursor = state.theme.get_cursor("left_ptr".into())
+            .expect("Could not load default cursor set");
+        let image: wlroots::render::Image = xcursor.image(0)
+            .expect("xcursor had no images").into();
+        cursor.set_image(&image)
+            .expect("Could not set cursor image");
+        state.cursor = Some(cursor);
+    }
+    Some(result)
+}
+
+struct PointerHandler;
+
+impl pointer::Handler for PointerHandler {
+    #[wlroots_dehandle]
+    fn on_motion(&mut self,
+                 compositor_handle: compositor::Handle,
+                 _pointer_handle: pointer::Handle,
+                 motion_event: &pointer::event::Motion) {
+        #[dehandle] let compositor = compositor_handle;
+        let &mut CompositorState { ref mut cursor, .. } = compositor.downcast();
+        if let Some(cursor) = cursor.as_mut() {
+            let (delta_x, delta_y) = motion_event.delta();
+            let (cur_x, cur_y) = cursor.coords();
+            cursor.move_to(cur_x + delta_x, cur_y + delta_y)
+                .expect("Could not move cursor");
+        }
+    }
+}
+
+
+fn pointer_added(_compositor_handle: compositor::Handle,
+                     _pointer_handle: pointer::Handle)
+                     -> Option<Box<pointer::Handler>> {
+    Some(Box::new(PointerHandler))
+}
+
+struct CompositorState {
+    theme: xcursor::Theme,
+    cursor: Option<wlroots::output::Cursor>
+}
+
+fn main() {
+    init_logging(WLR_DEBUG, None);
+    let theme = xcursor::Theme::load_theme(None, 16)
+        .expect("Could not create xcursor manager");
+    let output_builder = wlroots::output::manager::Builder::default()
+        .output_added(output_added);
+    let input_builder = wlroots::input::manager::Builder::default()
+        .pointer_added(pointer_added)
+        .keyboard_added(keyboard_added);
+    let compositor = compositor::Builder::new()
+        .gles2(true)
+        .input_manager(input_builder)
+        .output_manager(output_builder)
+        .build_auto(CompositorState { theme, cursor: None });
+    compositor.run();
+}
 ```
 
 > # Box of the Socratic Teaching Style
