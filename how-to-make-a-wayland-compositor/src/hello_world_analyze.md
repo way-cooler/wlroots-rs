@@ -48,7 +48,7 @@ just pass the unit type `()`.
 
 Once the `Compositor` is set up then `run` can be called. This will put it in
 the main Wayland event loop listening for events and dispatching to the
-callbacks. It will keep running until `wlroots::terminate` is called. Since thi s
+callbacks. It will keep running until `wlroots::terminate` is called. Since this
 is never call it in this compositor it won't happen until it's kill it via a 
 signal.
 
