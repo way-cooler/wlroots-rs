@@ -22,6 +22,10 @@ path = "src/2-goodbye-world/main.rs"
 name = "getting-to-the-point"
 path = "src/3-getting-to-the-point/main.rs"
 
+[[bin]]
+name = "breaking-out-of-your-shell"
+path = "src/4-breaking-out-of-your-shell/main.rs"
+
 [dependencies]
 # There is intentionally only a dependency on wlroots, even though other libraries
 # are useful in building a compositor we only want to showcase what wlroots does.
