@@ -40,7 +40,7 @@ Here is a list of compositors that will be referenced later in this book:
 * [sway](https://swaywm.org/)
   - A clone of i3 by Drew Devault, the first popular tiling Wayland compositor. The wlroots project is overseen by sway.
 * [KWin](https://userbase.kde.org/KWin)
-  - The KDE Wayland compositor, is the direct continuation of the X11 Plasma desktop (which is deprecated).
+  - The KDE Wayland compositor, is the direct continuation of the X11 Plasma desktop.
 * [mutter](https://gitlab.gnome.org/GNOME/mutter)
   - The Gnome Wayland compositor, is the direct continuation of the X11 Gnome desktop (which is deprecated).
 
