@@ -24,8 +24,8 @@ impl pointer::Handler for PointerHandler {
 }
 
 fn pointer_added(_compositor_handle: compositor::Handle,
-                     _pointer_handle: pointer::Handle)
-                     -> Option<Box<pointer::Handler>> {
+                 _pointer_handle: pointer::Handle)
+                 -> Option<Box<pointer::Handler>> {
     Some(Box::new(PointerHandler))
 }
 
@@ -42,13 +42,12 @@ event](http://way-cooler.org/docs/wlroots/input/pointer/event/struct.Motion.html
 This event is provided in the [`pointer::Handler::on_motion`
 callback](http://way-cooler.org/docs/wlroots/input/pointer/trait.Handler.html#method.on_motion).
 This event provides deltas corresponding to the movement amount. By keeping a
-running sum the absolute position of the mouse, in output coordinates, can be
+running sum, the absolute position of the mouse, in output coordinates, can be
 determined.
 
 > # Different coordinate types
 > Throughout this book different coordinate types will be used. Each coordinate
-> is an absolute number representing some relative difference in relation to
-> something.
+> is a number representing a position inside some viewport.
 >
 > The main types of coordinates used are:
 > 1. Output coordinates
@@ -87,9 +86,9 @@ impl pointer::Handler for PointerHandler {
 ## Rendering a mouse with xcursor
 Now that the mouse position can be tracked it's time to render it to the screen.
 
-The xcursor library doesn't render do any rendering itself, it just provides
-images from the system. In a typical desktop environment the cursor changes its
-icon depending on what's under it, which requires a manager to keep track of all
+The xcursor library doesn't render anything itself, it just provides images from
+the system. In a typical desktop environment the cursor changes its icon
+depending on what's under it, which requires a manager to keep track of all
 these types of images.
 
 In fact, in Wayland clients can dictate what the cursor looks like. When a
@@ -106,18 +105,26 @@ Now that the image has been obtained there needs to be something to render it
 onto. Thus far the compositor has not been aware of any outputs, beyond the auto
 detection it does during backend setup. 
 
+### Outputs
 An [Output](http://way-cooler.org/docs/wlroots/output/struct.Output.html)
 represents a rectangular view port on which clients and other content are
-rendered on to. 
+rendered. Generally this means a monitor plugged into the computer, though if
+the Wayland or X11 backends are used then it will instead be a window as a
+client to the host system.
 
-Setting up an output is done in the same as setting up an input:
+
+Setting up an output is done in the same as setting up an input. There is only
+one crucial difference: when setting up an output there needs to be a [mode set
+for the output using the builder passed into the
+function](http://way-cooler.org/docs/wlroots/output/struct.Builder.html).
+
 
 ```rust
 struct OutputHandler;
 
 impl output::Handler for OutputHandler {}
 
-fn output_added<'output>(compositor: compositor::Handle,
+    fn output_added<'output>(compositor: compositor::Handle,
                              builder: output::Builder<'output>)
                              -> Option<output::BuilderResult<'output>> {
     Some(builder.build_best_mode(OutputHandler))
@@ -141,7 +148,10 @@ abstracts over rendering a cursor. This is because many backends support
 "hardware" cursors. This is a feature provided by GPUs that allow moving a
 cursor around the screen without redrawing anything underneath it.
 
-Using this new type this is a basic cursor implementation with wlroots:
+If hardware cursors aren't supported the `output::Cursor` will revert to using
+software cursors automatically.
+
+Using this new type this is a complete basic cursor implementation with wlroots:
 
 ```rust
 struct OutputHandler;
@@ -221,7 +231,8 @@ fn main() {
 
 > # Box of the Socratic Teaching Style
 > Before continuing, I suggest you think for a moment on some complications or
-> desirable features we ignored in this design.
+> desirable features we ignored in this design. Try using the above example
+> yourself and see if there's any bugs in it.
 >
 > When considering features for your compositor, it's important to consider
 > setups different from your own, which can help ensure your compositor is
