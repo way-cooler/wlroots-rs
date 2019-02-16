@@ -1,8 +1,9 @@
 extern crate wlroots;
 
 mod keyboard;
-mod pointer;
 mod output;
+mod pointer;
+mod seat;
 
 use wlroots::{compositor,
               utils::log::{WLR_DEBUG, init_logging},
@@ -14,6 +15,7 @@ use crate::{pointer::pointer_added,
 
 pub struct CompositorState {
     xcursor_manager: wlroots::cursor::xcursor::Manager,
+    seat_handle: wlroots::seat::Handle,
     cursor_handle: wlroots::cursor::Handle,
     output_layout_handle: wlroots::output::layout::Handle
 }
@@ -26,19 +28,23 @@ fn main() {
     let input_builder = wlroots::input::manager::Builder::default()
         .pointer_added(pointer_added)
         .keyboard_added(keyboard_added);
-    let compositor = compositor::Builder::new()
+    let mut compositor = compositor::Builder::new()
         .input_manager(input_builder)
         .output_manager(output_builder)
         .build_auto(compositor_state);
+    setup_seat(&mut compositor);
     compositor.run();
 }
 
 #[wlroots_dehandle]
-pub fn setup_compositor_state() -> CompositorState {
+fn setup_compositor_state() -> CompositorState {
     use wlroots::{cursor::{Cursor, xcursor},
+                  seat,
                   output::layout::Layout};
     use crate::{pointer::CursorHandler, output::LayoutHandler};
     let output_layout_handle = Layout::create(Box::new(LayoutHandler));
+    // Make a sentinel seat to be filled in after the compositor is created.
+    let seat_handle = seat::Handle::new();
     let cursor_handle = Cursor::create(Box::new(CursorHandler));
     let xcursor_manager = xcursor::Manager::create("default".to_string(), 24)
         .expect("Could not create xcursor manager");
@@ -48,5 +54,17 @@ pub fn setup_compositor_state() -> CompositorState {
     cursor.attach_output_layout(output_layout);
     CompositorState { xcursor_manager,
                       cursor_handle,
+                      seat_handle,
                       output_layout_handle }
+}
+
+/// Set up the seat for the compositor.
+/// Needs to be done after the compositor is already created.
+fn setup_seat(compositor: &mut compositor::Compositor) {
+    use wlroots::seat::Seat;
+    let seat_handle = Seat::create(compositor,
+                                   "default".into(),
+                                   Box::new(seat::SeatHandler));
+    let state: &mut CompositorState = compositor.data.downcast_mut().unwrap();
+    state.seat_handle = seat_handle;
 }
