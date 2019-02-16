@@ -12,6 +12,7 @@ impl cursor::Handler for CursorHandler {}
 pub struct PointerHandler;
 
 impl pointer::Handler for PointerHandler {
+    /// Triggered when the pointer is moved on the Wayland and X11 backends.
     #[wlroots_dehandle]
     fn on_motion_absolute(&mut self,
                           compositor_handle: compositor::Handle,
@@ -25,6 +26,7 @@ impl pointer::Handler for PointerHandler {
     }
 
     #[wlroots_dehandle]
+    /// Triggered when the pointer is moved in the DRM backend.
     fn on_motion(&mut self,
                  compositor_handle: compositor::Handle,
                  _pointer_handle: pointer::Handle,

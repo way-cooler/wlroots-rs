@@ -27,13 +27,21 @@ Here is the new compositor setup code that uses `Cursor`, `output::Layout`, and
 
 Outputs can be [added to the layout with
 `Layout::add_auto`](http://way-cooler.org/docs/wlroots/output/layout/struct.Layout.html#method.add_auto)
-once they are advertised to the compositor:<sup>3</sup> 
+once they are advertised to the compositor:<sup>3</sup> This will allow the
+cursor to warp to the next output when the edge is reached between two outputs
+in the output layout coordinate space.
 
 ```rust
 {{#include 3-getting-to-the-point/output.rs:13:}}
 ```
 
 # Moving the `Pointer`
+There is no longer any need to keep track of the current pointer location. This
+is tracked by the `Cursor` and can be updated using `move_to` and `warp`.
+
+We also should update the cursor image when a pointer is added so that the
+correct state can be rendered.
+
 Finally here is the code that updates the cursor when the pointer moves:
 
 ```rust
@@ -56,5 +64,4 @@ repo](https://github.com/swaywm/wlroots-rs/tree/master/how-to-make-a-wayland-com
 <sup>3</sup> Normally you'd want to [add the output at a specific
 point](http://way-cooler.org/docs/wlroots/output/layout/struct.Layout.html#method.add)
 in the layout. However this requires user configuration, which is out of the
-scope of this book. Currently there is no xrandr equivalent for Wayland as
-each compositor must support the same protocol describing output layouts.
+scope of this book. Currently there is no xrandr equivalent for Wayland.
