@@ -1,6 +1,6 @@
 [package]
 name = "how-to-make-a-wayland-compositor"
-version = "0.2.0"
+version = "0.3.0"
 description = "Book describing how to make a compositor with wlroots-rs. Includes example compositor."
 authors = ["Timidger <APragmaticPlace@gmail.com>"]
 # Explicitly waive all rights to this document, including the code samples inside.
@@ -25,7 +25,7 @@ path = "src/3-getting-to-the-point/main.rs"
 [dependencies]
 # There is intentionally only a dependency on wlroots, even though other libraries
 # are useful in building a compositor we only want to showcase what wlroots does.
-wlroots = { path = "..", features = ["unstable", "static"], version = "0.2.0" }
+wlroots = { path = "..", features = ["unstable", "static"], version = "0.3.0" }
 
 [build-dependencies]
 # This is used to build the book which references the code in the example compositor.
