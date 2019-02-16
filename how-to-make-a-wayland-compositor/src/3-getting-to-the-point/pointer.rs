@@ -35,7 +35,7 @@ impl pointer::Handler for PointerHandler {
         let &mut CompositorState { ref cursor_handle, .. } = compositor.downcast();
         #[dehandle] let cursor = cursor_handle;
         let (delta_x, delta_y) = motion_event.delta();
-        cursor.move_to(None, delta_x, delta_y);
+        cursor.move_relative(None, delta_x, delta_y);
     }
 }
 

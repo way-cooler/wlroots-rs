@@ -193,7 +193,7 @@ impl pointer::Handler for PointerHandler {
         if let Some(cursor) = cursor.as_mut() {
             let (delta_x, delta_y) = motion_event.delta();
             let (cur_x, cur_y) = cursor.coords();
-            cursor.move_to(cur_x + delta_x, cur_y + delta_y)
+            cursor.move_relative(cur_x + delta_x, cur_y + delta_y)
                 .expect("Could not move cursor");
         }
     }

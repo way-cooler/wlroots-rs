@@ -37,7 +37,7 @@ in the output layout coordinate space.
 
 # Moving the `Pointer`
 There is no longer any need to keep track of the current pointer location. This
-is tracked by the `Cursor` and can be updated using `move_to` and `warp`.
+is tracked by the `Cursor` and can be updated using `move_relative` and `warp`.
 
 We also should update the cursor image when a pointer is added so that the
 correct state can be rendered.
