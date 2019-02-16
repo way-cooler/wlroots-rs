@@ -160,8 +160,8 @@ impl output::Handler for OutputHandler {}
 
 #[wlroots_dehandle]
 fn output_added<'output>(compositor: compositor::Handle,
-                             builder: output::Builder<'output>)
-                             -> Option<output::BuilderResult<'output>> {
+                         builder: output::Builder<'output>)
+                         -> Option<output::BuilderResult<'output>> {
     let result = builder.build_best_mode(OutputHandler);
     {
         #[dehandle] let compositor = compositor;
@@ -201,8 +201,8 @@ impl pointer::Handler for PointerHandler {
 
 
 fn pointer_added(_compositor_handle: compositor::Handle,
-                     _pointer_handle: pointer::Handle)
-                     -> Option<Box<pointer::Handler>> {
+                 _pointer_handle: pointer::Handle)
+                 -> Option<Box<pointer::Handler>> {
     Some(Box::new(PointerHandler))
 }
 
