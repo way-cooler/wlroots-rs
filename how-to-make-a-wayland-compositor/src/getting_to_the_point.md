@@ -6,10 +6,11 @@ There are, generally speaking, two types of resources the compositor will
 render: contents of buffers owned by the compositor and contents of buffers
 owned by clients. 
 
-Client provided buffers are more complicated to handle in general since there
-need to be a certain amount of synchronization that needs to happen before the
-compositor can start rendering what is in the buffer. This will be dealt with in
-a later chapter since clients deserve their own chapter.
+Client provided buffers are more complicated to handle in general. They must
+synchronize their buffers with the compositor so that it can render without
+screen tearing. Clients can also damage only part of their buffers to reduce the
+amount of redrawing per frame. Because of this complexity, clients will be dealt
+with in a later chapter.
 
 Between different compositors the amount of compositor-owned buffers varies.
 For example, some compositors render their own background, status bars, and
@@ -23,5 +24,5 @@ As simple as that sounds, it's actually very complicated rendering a cursor
 correctly. Thankfully wlroots makes it much easier.
 
 [Suggested reading for an in-depth dive on how input handling works in
-wlroots](https://drewdevault.com/2018/07/17/Input-handling-in-wlroots.html)
+wlroots](https://drewdevault.com/2018/07/17/Input-handling-in-wlroots.html).
 
