@@ -26,6 +26,7 @@ pub struct CompositorState {
     seat_handle: wlroots::seat::Handle,
     cursor_handle: wlroots::cursor::Handle,
     output_layout_handle: wlroots::output::layout::Handle,
+    outputs: HashSet<wlroots::output::Handle>,
     inputs: Inputs
 }
 
@@ -66,6 +67,7 @@ fn setup_compositor_state() -> CompositorState {
                       cursor_handle,
                       seat_handle,
                       output_layout_handle,
+                      outputs: HashSet::with_capacity(4),
                       inputs: Inputs::default() }
 }
 
