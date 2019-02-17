@@ -6,7 +6,7 @@ mod pointer;
 mod seat;
 mod xdg_shell;
 
-use std::collections::HashSet;
+use std::{collections::HashSet, env, process::{Command, Stdio}};
 
 use wlroots::{compositor,
               utils::log::{WLR_DEBUG, init_logging},
@@ -56,6 +56,7 @@ fn main() {
         .xdg_shell_manager(xdg_shell_builder)
         .build_auto(compositor_state);
     setup_seat(&mut compositor);
+    spawn_startup_command(&compositor);
     compositor.run();
 }
 
@@ -93,4 +94,21 @@ fn setup_seat(compositor: &mut compositor::Compositor) {
                                    Box::new(seat::SeatHandler));
     let state: &mut CompositorState = compositor.data.downcast_mut().unwrap();
     state.seat_handle = seat_handle;
+}
+
+/// Spawns a startup command, if one was provided on the command line.
+fn spawn_startup_command(compositor: &compositor::Compositor) {
+    let args = env::args().skip(1).collect::<Vec<_>>();
+    env::set_var("WAYLAND_DISPLAY", compositor.socket_name());
+    if args.len() > 0 {
+        let command = args.join(" ");
+        Command::new("/bin/sh")
+            .arg("-c")
+            .arg(command.as_str())
+            .stdin(Stdio::null())
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .spawn()
+            .expect(&format!("Could not spawn {}", command));
+    }
 }
