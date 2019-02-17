@@ -4,6 +4,7 @@ mod keyboard;
 mod output;
 mod pointer;
 mod seat;
+mod xdg_shell;
 
 use std::collections::HashSet;
 
@@ -14,6 +15,11 @@ use wlroots::{compositor,
 use crate::{pointer::pointer_added,
             keyboard::keyboard_added,
             output::output_added};
+
+#[derive(Default)]
+pub struct Shells {
+    xdg_shells: HashSet<wlroots::shell::xdg_shell::Handle>
+}
 
 #[derive(Default)]
 pub struct Inputs {
@@ -27,6 +33,7 @@ pub struct CompositorState {
     cursor_handle: wlroots::cursor::Handle,
     output_layout_handle: wlroots::output::layout::Handle,
     outputs: HashSet<wlroots::output::Handle>,
+    shells: Shells,
     inputs: Inputs
 }
 
@@ -38,10 +45,15 @@ fn main() {
     let input_builder = wlroots::input::manager::Builder::default()
         .pointer_added(pointer_added)
         .keyboard_added(keyboard_added);
+    let xdg_shell_builder = wlroots::shell::xdg_shell::manager::Builder::default()
+        .surface_added(xdg_shell::new_surface);
     let mut compositor = compositor::Builder::new()
         .gles2(true)
+        .wl_shm(true)
+        .data_device(true)
         .input_manager(input_builder)
         .output_manager(output_builder)
+        .xdg_shell_manager(xdg_shell_builder)
         .build_auto(compositor_state);
     setup_seat(&mut compositor);
     compositor.run();
@@ -67,7 +79,8 @@ fn setup_compositor_state() -> CompositorState {
                       cursor_handle,
                       seat_handle,
                       output_layout_handle,
-                      outputs: HashSet::with_capacity(4),
+                      shells: Shells::default(),
+                      outputs: HashSet::default(),
                       inputs: Inputs::default() }
 }
 
