@@ -11,8 +11,8 @@ the browser, the text editor, the terminal emulator, and any other program the
 user might want to use.
 
 There are only three more parts of the pipeline that need to be implemented
-before the compositor is usable: spawning clients, communicating with clients,
-and rendering clients.
+before the compositor is usable: spawning new clients, communicating to client
+requests, and rendering client buffers.
 
 ## Spawning clients in the compositor
 The `WAYLAND_DISPLAY` environment variable is used by clients to determine
@@ -24,9 +24,9 @@ To spawn clients with this inherited environment [`Command` from the standard
 library can be used](https://doc.rust-lang.org/std/process/struct.Command.html).
 
 In order to keep the compositor simple, the compositor will be configured to
-spawn a single client once it starts specified on the command line. By
+spawn a single client once it starts specified on the command line.<sup>1</sup> By
 spawning a useful utility, like a terminal emulator, other programs can be
-spawned in the compositor.<sup>1</sup>
+spawned in the compositor.<sup>2</sup>
 
 ## Responding to client requests
 Clients use a variety of protocols to communicate with Wayland compositors. Some
@@ -44,7 +44,8 @@ clients and events can be sent to the clients once a handle to them has been
 upgraded.
 
 The main object that will be used to communicate with clients is the
-[Seat](http://way-cooler.org/docs/wlroots/seat/struct.Seat.html)
+[Seat](http://way-cooler.org/docs/wlroots/seat/struct.Seat.html). A seat
+allows the compositor to send input events to clients.
 
 ## Rendering clients on the outputs
 There is a special class of protocol that will be used by clients that want to
@@ -69,3 +70,10 @@ script should be used instead of this ad-hoc method. Generally keybindings are
 also registered that can spawn programs, depending on the user's preference.
 Since this bookkeeping is not strictly related to building a compositor
 however, this exercise is left to the reader.
+
+<sup>2</sup> Note that for testing a good flow is to run the compositor under an
+X11 WM or an existing Wayland compositor. This make it both easier to back out of
+mistakes (a infinite loop won't force a restart) and you can spawn programs in a
+separate shell by overriding `WAYLAND_DISPLAY` before running them.
+
+
