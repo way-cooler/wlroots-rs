@@ -1,12 +1,27 @@
 use wlroots::{wlroots_dehandle, compositor,
               input::keyboard,
+              seat::Capability,
               xkbcommon::xkb::keysyms,
               wlr_key_state::WLR_KEY_PRESSED};
 
-pub fn keyboard_added(_compositor_handle: compositor::Handle,
-                  _keyboard_handle: keyboard::Handle)
-                  -> Option<Box<keyboard::Handler>> {
-    Some(Box::new(KeyboardHandler::default()))
+use crate::{CompositorState, Inputs};
+
+#[wlroots_dehandle]
+pub fn keyboard_added(compositor_handle: compositor::Handle,
+                      keyboard_handle: keyboard::Handle)
+                      -> Option<Box<keyboard::Handler>> {
+    #[dehandle] let compositor = compositor_handle;
+    let CompositorState { ref seat_handle,
+                          inputs: Inputs { ref mut keyboards, ..  },
+                          .. } = compositor.downcast();
+    keyboards.insert(keyboard_handle);
+    if keyboards.len() == 1 {
+        #[dehandle] let seat = seat_handle;
+        let mut cap = seat.capabilities();
+        cap.insert(Capability::Keyboard);
+        seat.set_capabilities(cap);
+    }
+    Some(Box::new(KeyboardHandler::default()) as _)
 }
 
 #[derive(Default)]
@@ -41,6 +56,23 @@ impl keyboard::Handler for KeyboardHandler {
                 }
                 _ => { /* Do nothing */ }
             }
+        }
+    }
+
+    #[wlroots_dehandle]
+    fn destroyed(&mut self,
+                 compositor_handle: compositor::Handle,
+                 keyboard_handle: keyboard::Handle) {
+        #[dehandle] let compositor = compositor_handle;
+        let CompositorState { ref seat_handle,
+                              inputs: Inputs { ref mut keyboards, ..  },
+                              .. } = compositor.downcast();
+        keyboards.remove(&keyboard_handle);
+        if keyboards.len() == 0 {
+            #[dehandle] let seat = seat_handle;
+            let mut cap = seat.capabilities();
+            cap.remove(Capability::Keyboard);
+            seat.set_capabilities(cap)
         }
     }
 }

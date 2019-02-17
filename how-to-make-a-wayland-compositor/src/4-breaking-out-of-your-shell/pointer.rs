@@ -1,9 +1,10 @@
 use wlroots::{wlroots_dehandle,
               compositor,
               input::pointer,
+              seat::Capability,
               cursor};
 
-use CompositorState;
+use crate::{CompositorState, Inputs};
 
 pub struct CursorHandler;
 
@@ -37,6 +38,23 @@ impl pointer::Handler for PointerHandler {
         let (delta_x, delta_y) = motion_event.delta();
         cursor.move_relative(None, delta_x, delta_y);
     }
+
+    #[wlroots_dehandle]
+    fn destroyed(&mut self,
+                 compositor_handle: compositor::Handle,
+                 pointer_handle: pointer::Handle) {
+        #[dehandle] let compositor = compositor_handle;
+        let &mut CompositorState { ref seat_handle,
+                                   inputs: Inputs { ref mut pointers, .. },
+                                   .. } = compositor.downcast();
+        pointers.remove(&pointer_handle);
+        if pointers.len() == 0 {
+            #[dehandle] let seat = seat_handle;
+            let mut cap = seat.capabilities();
+            cap.remove(Capability::Pointer);
+            seat.set_capabilities(cap)
+        }
+    }
 }
 
 #[wlroots_dehandle]
@@ -45,8 +63,18 @@ pub fn pointer_added(compositor_handle: compositor::Handle,
                      -> Option<Box<pointer::Handler>> {
     #[dehandle] let compositor = compositor_handle;
     #[dehandle] let pointer = pointer_handle;
-    let CompositorState { ref cursor_handle, ref mut xcursor_manager,
+    let CompositorState { ref cursor_handle,
+                          ref seat_handle,
+                          ref mut xcursor_manager,
+                          inputs: Inputs { ref mut pointers, ..  },
                           .. } = compositor.downcast();
+    pointers.insert(pointer_handle.clone());
+    if pointers.len() == 1 {
+        #[dehandle] let seat = seat_handle;
+        let mut cap = seat.capabilities();
+        cap.insert(Capability::Pointer);
+        seat.set_capabilities(cap)
+    }
     #[dehandle] let cursor = cursor_handle;
     xcursor_manager.set_cursor_image("left_ptr".to_string(), cursor);
     cursor.attach_input_device(pointer.input_device());

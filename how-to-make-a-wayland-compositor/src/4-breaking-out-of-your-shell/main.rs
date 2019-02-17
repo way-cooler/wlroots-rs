@@ -5,6 +5,8 @@ mod output;
 mod pointer;
 mod seat;
 
+use std::collections::HashSet;
+
 use wlroots::{compositor,
               utils::log::{WLR_DEBUG, init_logging},
               wlroots_dehandle};
@@ -13,11 +15,18 @@ use crate::{pointer::pointer_added,
             keyboard::keyboard_added,
             output::output_added};
 
+#[derive(Default)]
+pub struct Inputs {
+    pointers: HashSet<wlroots::input::pointer::Handle>,
+    keyboards: HashSet<wlroots::input::keyboard::Handle>,
+}
+
 pub struct CompositorState {
     xcursor_manager: wlroots::cursor::xcursor::Manager,
     seat_handle: wlroots::seat::Handle,
     cursor_handle: wlroots::cursor::Handle,
-    output_layout_handle: wlroots::output::layout::Handle
+    output_layout_handle: wlroots::output::layout::Handle,
+    inputs: Inputs
 }
 
 fn main() {
@@ -55,7 +64,8 @@ fn setup_compositor_state() -> CompositorState {
     CompositorState { xcursor_manager,
                       cursor_handle,
                       seat_handle,
-                      output_layout_handle }
+                      output_layout_handle,
+                      inputs: Inputs::default() }
 }
 
 /// Set up the seat for the compositor.
