@@ -1,6 +1,11 @@
-use wlroots::{wlroots_dehandle, compositor, output};
+use wlroots::{wlroots_dehandle,
+              area::{Area, Origin, Size},
+              compositor,
+              render::{matrix, Renderer},
+              output,
+              utils::current_time};
 
-use crate::CompositorState;
+use crate::{CompositorState, Shells};
 
 pub struct LayoutHandler;
 
@@ -15,9 +20,12 @@ impl output::Handler for OutputHandler {
                 output_handle: output::Handle) {
         #[dehandle] let compositor = compositor_handle;
         #[dehandle] let output = output_handle;
+        let state: &mut CompositorState = compositor.data
+            .downcast_mut().unwrap();
         let renderer = compositor.renderer.as_mut().unwrap();
         let mut render_context = renderer.render(output, None);
         render_context.clear([0.0, 0.0, 0.0, 1.0]);
+        render_shells(state, &mut render_context)
     }
 
     #[wlroots_dehandle]
@@ -31,6 +39,41 @@ impl output::Handler for OutputHandler {
         outputs.remove(&output_handle);
     }
 }
+
+/// Render the shells in the current compositor state on the output attached
+/// to the `Renderer`.
+#[wlroots_dehandle]
+fn render_shells(state: &mut CompositorState, renderer: &mut Renderer) {
+    let CompositorState { ref output_layout_handle,
+                          shells: Shells { ref xdg_shells }, .. } = state;
+    for shell in xdg_shells {
+        #[dehandle] let shell = &shell;
+        #[dehandle] let surface = shell.surface();
+        #[dehandle] let layout = output_layout_handle;
+        let (width, height) = surface.current_state().size();
+        // The size of the surface depends on the output scale.
+        let (render_width, render_height) =
+            (width * renderer.output.scale() as i32,
+             height * renderer.output.scale() as i32);
+        let (lx, ly) = (0.0, 0.0);
+        let render_area = Area::new(Origin::new(lx as i32, ly as i32),
+                                    Size::new(render_width, render_height));
+        // Only render the view if it is in the output area.
+        if layout.intersects(renderer.output, render_area) {
+            let transform = renderer.output.get_transform().invert();
+            let matrix = matrix::project_box(render_area,
+                                             transform,
+                                             0.0,
+                                             renderer.output
+                                             .transform_matrix());
+            if let Some(texture) = surface.texture().as_ref() {
+                renderer.render_texture_with_matrix(texture, matrix);
+            }
+            surface.send_frame_done(current_time());
+        }
+    }
+}
+
 #[wlroots_dehandle]
 pub fn output_added<'output>(compositor: compositor::Handle,
                              builder: output::Builder<'output>)
