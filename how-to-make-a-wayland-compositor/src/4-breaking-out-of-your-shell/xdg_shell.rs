@@ -20,7 +20,7 @@ impl xdg_shell::Handler for XdgShellHandler {
         #[dehandle] let compositor = compositor_handle;
         let CompositorState { shells: Shells { ref mut xdg_shells }, ..} =
             compositor.downcast();
-        xdg_shells.insert(shell_handle.clone());
+        xdg_shells.push_back(shell_handle.clone());
     }
 
     #[wlroots_dehandle]
@@ -31,7 +31,7 @@ impl xdg_shell::Handler for XdgShellHandler {
         #[dehandle] let compositor = compositor_handle;
         let CompositorState { shells: Shells { ref mut xdg_shells }, ..} =
             compositor.downcast();
-        xdg_shells.remove(&shell_handle);
+        xdg_shells.retain(|shell| *shell != shell_handle);
     }
 
     #[wlroots_dehandle]
@@ -41,7 +41,7 @@ impl xdg_shell::Handler for XdgShellHandler {
         #[dehandle] let compositor = compositor_handle;
         let CompositorState { shells: Shells { ref mut xdg_shells }, ..} =
             compositor.downcast();
-        xdg_shells.remove(&shell_handle);
+        xdg_shells.retain(|shell| *shell != shell_handle);
     }
 }
 

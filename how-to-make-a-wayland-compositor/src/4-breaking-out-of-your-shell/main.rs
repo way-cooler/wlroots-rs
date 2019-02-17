@@ -6,7 +6,7 @@ mod pointer;
 mod seat;
 mod xdg_shell;
 
-use std::{collections::HashSet, env, process::{Command, Stdio}};
+use std::{collections::{HashSet, VecDeque}, env, process::{Command, Stdio}};
 
 use wlroots::{compositor,
               utils::log::{WLR_DEBUG, init_logging},
@@ -18,7 +18,7 @@ use crate::{pointer::pointer_added,
 
 #[derive(Default)]
 pub struct Shells {
-    xdg_shells: HashSet<wlroots::shell::xdg_shell::Handle>
+    xdg_shells: VecDeque<wlroots::shell::xdg_shell::Handle>
 }
 
 #[derive(Default)]
