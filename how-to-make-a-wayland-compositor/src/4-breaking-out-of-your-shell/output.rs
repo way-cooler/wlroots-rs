@@ -52,11 +52,19 @@ fn render_shells(state: &mut CompositorState, renderer: &mut Renderer) {
         #[dehandle] let layout = output_layout_handle;
         let (width, height) = surface.current_state().size();
         // The size of the surface depends on the output scale.
-        let (render_width, render_height) =
-            (width * renderer.output.scale() as i32,
-             height * renderer.output.scale() as i32);
-        let (lx, ly) = (0.0, 0.0);
-        let render_area = Area::new(Origin::new(lx as i32, ly as i32),
+        let output_scale = renderer.output.scale() as i32;
+        let (render_width, render_height) = (width * output_scale,
+                                             height * output_scale);
+        let (ox, oy) = match layout.get_output_info(renderer.output) {
+            Some(output_layout) => {
+                let (mut ox, mut oy) = output_layout.coords();
+                ox *= output_scale;
+                oy *= output_scale;
+                (ox, oy)
+            }
+            None => return
+        };
+        let render_area = Area::new(Origin::new(ox as i32, oy as i32),
                                     Size::new(render_width, render_height));
         // Only render the view if it is in the output area.
         if layout.intersects(renderer.output, render_area) {
