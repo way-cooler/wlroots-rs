@@ -17,7 +17,7 @@ impl output::Handler for OutputHandler {
         #[dehandle] let output = output_handle;
         let renderer = compositor.renderer.as_mut().unwrap();
         let mut render_context = renderer.render(output, None);
-        render_context.clear([0.25, 0.25, 0.25, 1.0]);
+        render_context.clear([0.0, 0.0, 0.0, 1.0]);
     }
 
     #[wlroots_dehandle]
