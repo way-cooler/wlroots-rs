@@ -50,6 +50,9 @@ pub fn output_added<'output>(compositor: compositor::Handle,
     #[dehandle] let cursor = cursor_handle;
     #[dehandle] let layout = output_layout_handle;
     layout.add_auto(output);
+    // NOTE You _must_ attach the cursor to the layout before
+    // doing xcursor related with it. Otherwise if you hotplug outputs
+    // then the cursor will stop rendering correctly.
     cursor.attach_output_layout(layout);
     xcursor_manager.load(output.scale());
     xcursor_manager.set_cursor_image("left_ptr".to_string(), cursor);
