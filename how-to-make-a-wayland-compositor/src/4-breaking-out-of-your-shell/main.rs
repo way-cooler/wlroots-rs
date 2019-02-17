@@ -38,6 +38,7 @@ fn main() {
         .pointer_added(pointer_added)
         .keyboard_added(keyboard_added);
     let mut compositor = compositor::Builder::new()
+        .gles2(true)
         .input_manager(input_builder)
         .output_manager(output_builder)
         .build_auto(compositor_state);
