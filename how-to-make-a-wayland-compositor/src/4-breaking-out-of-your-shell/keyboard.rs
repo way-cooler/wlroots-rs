@@ -14,12 +14,14 @@ pub fn keyboard_added(compositor_handle: compositor::Handle,
     let CompositorState { ref seat_handle,
                           inputs: Inputs { ref mut keyboards, ..  },
                           .. } = compositor.downcast();
-    keyboards.insert(keyboard_handle);
+    keyboards.insert(keyboard_handle.clone());
     if keyboards.len() == 1 {
+        #[dehandle] let keyboard = keyboard_handle;
         #[dehandle] let seat = seat_handle;
         let mut cap = seat.capabilities();
         cap.insert(Capability::Keyboard);
         seat.set_capabilities(cap);
+        seat.set_keyboard(keyboard.input_device());
     }
     Some(Box::new(KeyboardHandler::default()) as _)
 }
@@ -57,6 +59,12 @@ impl keyboard::Handler for KeyboardHandler {
                 _ => { /* Do nothing */ }
             }
         }
+        #[dehandle] let compositor = compositor_handle;
+        let CompositorState { ref seat_handle, .. } = compositor.downcast();
+        #[dehandle] let seat = seat_handle;
+        seat.keyboard_notify_key(key_event.time_msec(),
+                                 key_event.keycode(),
+                                 key_event.key_state() as u32)
     }
 
     #[wlroots_dehandle]

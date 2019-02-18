@@ -6,10 +6,13 @@ mod pointer;
 mod seat;
 mod xdg_shell;
 
-use std::{collections::{HashSet, VecDeque}, env, process::{Command, Stdio}};
+use std::{collections::{HashSet, VecDeque},
+          env,
+          process::{Command, Stdio}};
 
 use wlroots::{compositor,
               utils::log::{WLR_DEBUG, init_logging},
+              input::keyboard::Modifiers,
               wlroots_dehandle};
 
 use crate::{pointer::pointer_added,
@@ -25,6 +28,19 @@ pub struct Shells {
 pub struct Inputs {
     pointers: HashSet<wlroots::input::pointer::Handle>,
     keyboards: HashSet<wlroots::input::keyboard::Handle>,
+}
+
+impl Inputs {
+    #[wlroots_dehandle]
+    pub fn get_keyboard_info(&mut self) -> (Vec<u32>, Modifiers) {
+        match self.keyboards.iter().next() {
+            None => (vec![], Modifiers::default()),
+            Some(keyboard_handle) => {
+                #[dehandle] let keyboard = keyboard_handle;
+                (keyboard.keycodes(), keyboard.get_modifier_masks())
+            }
+        }
+    }
 }
 
 pub struct CompositorState {

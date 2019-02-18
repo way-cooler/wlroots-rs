@@ -4,7 +4,7 @@ use wlroots::{wlroots_dehandle,
               seat::Capability,
               cursor};
 
-use crate::{CompositorState, Inputs};
+use crate::{CompositorState, Inputs, Shells};
 
 pub struct CursorHandler;
 
@@ -13,6 +13,31 @@ impl cursor::Handler for CursorHandler {}
 pub struct PointerHandler;
 
 impl pointer::Handler for PointerHandler {
+    #[wlroots_dehandle]
+    fn on_button(&mut self,
+                 compositor: compositor::Handle,
+                 _pointer_handle: pointer::Handle,
+                 event: &pointer::event::Button) {
+        use wlroots::WLR_BUTTON_RELEASED;
+        #[dehandle] let compositor = compositor;
+        let CompositorState { shells: Shells { ref mut xdg_shells },
+                              inputs,
+                              ref seat_handle,
+                              .. } = compositor.downcast();
+        if event.state() == WLR_BUTTON_RELEASED {
+            return
+        }
+        if let Some(shell_handle) = xdg_shells.back() {
+            #[dehandle] let shell = shell_handle;
+            #[dehandle] let surface = shell.surface();
+            #[dehandle] let seat = seat_handle;
+            let (mut keycodes, mut modifier_masks) = inputs.get_keyboard_info();
+            seat.keyboard_notify_enter(surface,
+                                       &mut keycodes,
+                                       &mut modifier_masks);
+        }
+    }
+
     /// Triggered when the pointer is moved on the Wayland and X11 backends.
     #[wlroots_dehandle]
     fn on_motion_absolute(&mut self,
