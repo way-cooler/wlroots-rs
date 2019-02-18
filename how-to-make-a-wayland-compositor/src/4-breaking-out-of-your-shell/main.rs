@@ -28,6 +28,9 @@ pub struct Shells {
 pub struct Inputs {
     pointers: HashSet<wlroots::input::pointer::Handle>,
     keyboards: HashSet<wlroots::input::keyboard::Handle>,
+    shift_pressed: bool,
+    ctrl_pressed: bool,
+    clicked: bool
 }
 
 impl Inputs {

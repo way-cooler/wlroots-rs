@@ -23,14 +23,10 @@ pub fn keyboard_added(compositor_handle: compositor::Handle,
         seat.set_capabilities(cap);
         seat.set_keyboard(keyboard.input_device());
     }
-    Some(Box::new(KeyboardHandler::default()) as _)
+    Some(Box::new(KeyboardHandler) as _)
 }
 
-#[derive(Default)]
-struct KeyboardHandler {
-    shift_pressed: bool,
-    ctrl_pressed: bool
-}
+struct KeyboardHandler;
 
 impl keyboard::Handler for KeyboardHandler {
     #[wlroots_dehandle]
@@ -38,29 +34,30 @@ impl keyboard::Handler for KeyboardHandler {
               compositor_handle: compositor::Handle,
               _keyboard_handle: keyboard::Handle,
               key_event: &keyboard::event::Key) {
+        #[dehandle] let compositor = compositor_handle;
+        let CompositorState { inputs: Inputs { ref mut ctrl_pressed,
+                                               ref mut shift_pressed, .. },
+                              ref seat_handle, .. } =
+            compositor.data.downcast_mut().unwrap();
         for key in key_event.pressed_keys() {
             match key {
                 keysyms::KEY_Control_L | keysyms::KEY_Control_R =>
-                    self.ctrl_pressed = key_event.key_state() == WLR_KEY_PRESSED,
+                    *ctrl_pressed = key_event.key_state() == WLR_KEY_PRESSED,
                 keysyms::KEY_Shift_L | keysyms::KEY_Shift_R =>
-                    self.shift_pressed = key_event.key_state() == WLR_KEY_PRESSED,
+                    *shift_pressed = key_event.key_state() == WLR_KEY_PRESSED,
                 keysyms::KEY_Escape => {
-                    if self.shift_pressed && self.ctrl_pressed {
+                    if *shift_pressed && *ctrl_pressed {
                         wlroots::compositor::terminate()
                     }
                 },
                 keysyms::KEY_XF86Switch_VT_1 ..= keysyms::KEY_XF86Switch_VT_12 => {
-                    #[dehandle] let compositor = compositor_handle;
-                    let backend = compositor.backend_mut();
-                    if let Some(mut session) = backend.get_session() {
+                    if let Some(mut session) = compositor.backend.get_session() {
                         session.change_vt(key - keysyms::KEY_XF86Switch_VT_1 + 1);
                     }
                 }
                 _ => { /* Do nothing */ }
             }
         }
-        #[dehandle] let compositor = compositor_handle;
-        let CompositorState { ref seat_handle, .. } = compositor.downcast();
         #[dehandle] let seat = seat_handle;
         seat.keyboard_notify_key(key_event.time_msec(),
                                  key_event.keycode(),

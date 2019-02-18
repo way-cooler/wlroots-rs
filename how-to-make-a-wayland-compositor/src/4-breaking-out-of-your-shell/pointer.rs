@@ -21,10 +21,11 @@ impl pointer::Handler for PointerHandler {
         use wlroots::WLR_BUTTON_RELEASED;
         #[dehandle] let compositor = compositor;
         let CompositorState { shells: Shells { ref mut xdg_shells },
-                              inputs,
+                              ref mut inputs,
                               ref seat_handle,
                               .. } = compositor.downcast();
-        if event.state() == WLR_BUTTON_RELEASED {
+        inputs.clicked = event.state() == WLR_BUTTON_RELEASED;
+        if !inputs.clicked {
             return
         }
         if let Some(shell_handle) = xdg_shells.back() {
