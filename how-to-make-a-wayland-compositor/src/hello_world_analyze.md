@@ -46,10 +46,10 @@ When you build the compositor, just like you build any object in wlroots-rs, you
 need to give it user state. In this case, there is no state to store so you can
 just pass the unit type `()`.
 
-Once the `Compositor` is set up then `run` can be called. This will put it in
+Once the `Compositor` is set up `run` can be called. This will put it in
 the main Wayland event loop listening for events and dispatching to the
 callbacks. It will keep running until `wlroots::terminate` is called. Since this
-is never call it in this compositor it won't happen until it's kill it via a 
+is never called in this compositor it won't happen until it's killed via a 
 signal.
 
 ---
