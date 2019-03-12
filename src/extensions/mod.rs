@@ -4,3 +4,4 @@ pub mod screenshooter;
 pub mod screencopy;
 pub mod idle;
 pub mod gtk_primary_selection;
+pub mod virtual_keyboard;

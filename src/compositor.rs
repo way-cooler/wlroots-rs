@@ -14,7 +14,7 @@ use wlroots_sys::{wlr_backend_destroy, wlr_backend_start,
 
 use {backend::{self, UnsafeRenderSetupFunction, Backend, Session},
      data_device,
-     extensions::{server_decoration, gamma_control, screencopy, screenshooter, idle, gtk_primary_selection},
+     extensions::{server_decoration, gamma_control, screencopy, screenshooter, idle, gtk_primary_selection, virtual_keyboard},
      surface::{self, Surface, InternalSurface},
      input,
      output,
@@ -123,6 +123,8 @@ pub struct Compositor {
     pub screencopy_manager: Option<screencopy::ZManagerV1>,
     /// Optional screenshooter manager extension
     pub screenshooter: Option<screenshooter::Screenshooter>,
+    /// Optional virtual keyboard manager extension
+    pub virtual_keyboard_manager: Option<virtual_keyboard::ZManagerV1>,
     /// The renderer used to draw things to the screen.
     pub renderer: Option<GenericRenderer>,
     /// XWayland server, only Some if it is enabled
@@ -155,6 +157,7 @@ pub struct Builder {
     gtk_primary_selection_manager: bool,
     screencopy_manager: bool,
     screenshooter: bool,
+    virtual_keyboard_manager: bool,
     wayland_remote: Option<String>,
     x11_display: Option<String>,
     data_device_manager: bool,
@@ -276,11 +279,17 @@ impl Builder {
         self
     }
 
-
     /// Decide whether or not to enable the screenshooter protocol
     /// extension.
     pub fn screenshooter(mut self, screenshooter: bool) -> Self {
         self.screenshooter = screenshooter;
+        self
+    }
+
+    /// Decide whether or not to enable the virtual keyboard protocol
+    /// extension.
+    pub fn virtual_keyboard_manager(mut self, virtual_keyboard_manager: bool) -> Self {
+        self.virtual_keyboard_manager = virtual_keyboard_manager;
         self
     }
 
@@ -464,6 +473,11 @@ impl Builder {
         } else {
             None
         };
+        let virtual_keyboard_manager = if self.virtual_keyboard_manager {
+            virtual_keyboard::ZManagerV1::new(display)
+        } else {
+            None
+        };
         let data_device_manager = if self.data_device_manager {
             data_device::Manager::new(display as _)
         } else {
@@ -567,6 +581,7 @@ impl Builder {
                                       gtk_primary_selection_manager,
                                       screencopy_manager,
                                       screenshooter,
+                                      virtual_keyboard_manager,
                                       renderer,
                                       xwayland,
                                       user_terminate,
