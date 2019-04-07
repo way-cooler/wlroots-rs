@@ -23,7 +23,7 @@ use crate::{
     backend::{self, Backend, Session, UnsafeRenderSetupFunction},
     data_device,
     extensions::{
-        gamma_control, gtk_primary_selection, idle, idle_inhibit, screencopy, screenshooter,
+        export_dmabuf, gamma_control, gtk_primary_selection, idle, idle_inhibit, screencopy, screenshooter,
         server_decoration
     },
     input, output,
@@ -125,6 +125,8 @@ pub struct Compositor {
     socket_name: String,
     /// Optional decoration manager extension.
     pub server_decoration_manager: Option<server_decoration::Manager>,
+    /// Optional dma-buf manager extension.
+    pub export_dmabuf_manager: Option<export_dmabuf::ZManagerV1>,
     /// Optional gamma manager extension.
     pub gamma_control_manager: Option<gamma_control::ZManagerV1>,
     /// Optional idle manager extension.
@@ -164,6 +166,7 @@ pub struct Builder {
     gles2: bool,
     render_setup_function: Option<UnsafeRenderSetupFunction>,
     server_decoration_manager: bool,
+    export_dmabuf_manager: bool,
     gamma_control_manager: bool,
     idle_manager: bool,
     idle_inhibit_manager: bool,
@@ -261,6 +264,13 @@ impl Builder {
     /// extension.
     pub fn server_decoration_manager(mut self, server_decoration_manager: bool) -> Self {
         self.server_decoration_manager = server_decoration_manager;
+        self
+    }
+
+    /// Decide whether or not to enable the dma-buf manager protocol
+    /// extension.
+    pub fn export_dmabuf_manager(mut self, export_dmabuf_manager: bool) -> Self {
+        self.export_dmabuf_manager = export_dmabuf_manager;
         self
     }
 
@@ -478,6 +488,11 @@ impl Builder {
         } else {
             None
         };
+        let export_dmabuf_manager = if self.export_dmabuf_manager {
+            export_dmabuf::ZManagerV1::new(display)
+        } else {
+            None
+        };
         let gamma_control_manager = if self.gamma_control_manager {
             gamma_control::ZManagerV1::new(display)
         } else {
@@ -613,6 +628,7 @@ impl Builder {
             event_loop,
             wl_shm_fd,
             server_decoration_manager,
+            export_dmabuf_manager,
             gamma_control_manager,
             idle_manager,
             idle_inhibit_manager,
