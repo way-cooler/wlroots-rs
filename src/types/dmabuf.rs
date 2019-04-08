@@ -15,7 +15,7 @@ impl Dmabuf {
     pub fn new(compositor: &Compositor) -> Option<Self> {
         unsafe {
             // Get the renderer from compositor
-            let renderer: Option<&GenericRenderer> = compositor.renderer.as_ref();
+            let renderer: Option<&GenericRenderer> = compositor.get_renderer().as_ref();
             match renderer {
                 Some(ref renderer) => {
                     let dmabuf_raw = wlr_linux_dmabuf_v1_create(compositor.display as *mut wl_display, renderer.as_ptr());

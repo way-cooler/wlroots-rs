@@ -140,7 +140,7 @@ pub struct Compositor {
     /// Optional screenshooter manager extension
     pub screenshooter: Option<screenshooter::Screenshooter>,
     /// The renderer used to draw things to the screen.
-    pub renderer: Option<GenericRenderer>,
+    renderer: Option<GenericRenderer>,
     /// XWayland server, only Some if it is enabled
     pub xwayland: Option<xwayland::Server>,
     /// The DnD manager
@@ -691,6 +691,11 @@ impl Compositor {
     /// ```
     pub fn socket_name(&self) -> &str {
         self.socket_name.as_str()
+    }
+
+    /// Returns a reference to the Renderer for the Compositor
+    pub fn get_renderer(&self) -> &Option<GenericRenderer> {
+        &self.renderer
     }
 
     /// Enters the wayland event loop. Won't return until the compositor is
