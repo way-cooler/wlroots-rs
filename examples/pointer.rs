@@ -9,6 +9,7 @@ use wlroots::{
     compositor,
     cursor::{self, xcursor, Cursor},
     input::{self, keyboard, pointer},
+    render::GenericRenderer,
     output,
     utils::log::Logger
 };
@@ -173,8 +174,7 @@ impl output::Handler for ExOutput {
     fn on_frame(&mut self, compositor_handle: compositor::Handle, output_handle: output::Handle) {
         with_handles!([(compositor: {compositor_handle}), (output: {output_handle})] => {
             let compositor_state: &mut CompositorState = compositor.data.downcast_mut().unwrap();
-            let renderer = compositor.renderer.as_mut()
-                .expect("Compositor was not loaded with a renderer");
+            let renderer: &mut GenericRenderer = compositor.get_renderer().as_mut().unwrap();
             let mut render_context = renderer.render(output, None);
             render_context.clear(compositor_state.color);
         })
