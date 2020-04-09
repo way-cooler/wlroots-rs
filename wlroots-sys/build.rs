@@ -18,12 +18,12 @@ fn main() {
         .derive_default(true)
         .generate_comments(true)
         .header("src/wlroots.h")
-        .whitelisted_type(r"^wlr_.*$")
-        .whitelisted_type(r"^xkb_.*$")
-        .whitelisted_type(r"^XKB_.*$")
-        .whitelisted_function(r"^_?pixman_.*$")
-        .whitelisted_function(r"^_?wlr_.*$")
-        .whitelisted_function(r"^xkb_.*$")
+        .whitelist_type(r"^wlr_.*$")
+        .whitelist_type(r"^xkb_.*$")
+        .whitelist_type(r"^XKB_.*$")
+        .whitelist_function(r"^_?pixman_.*$")
+        .whitelist_function(r"^_?wlr_.*$")
+        .whitelist_function(r"^xkb_.*$")
         .ctypes_prefix("libc")
         .clang_arg("-Iwlroots/include")
         .clang_arg("-Iwlroots/include/wlr")
@@ -35,11 +35,11 @@ fn main() {
         .clang_arg("-Iwlroots/include/xcursor")
         .clang_arg("-I/usr/include/pixman-1")
         // Work around bug https://github.com/rust-lang-nursery/rust-bindgen/issues/687
-        .hide_type("FP_NAN")
-        .hide_type("FP_INFINITE")
-        .hide_type("FP_ZERO")
-        .hide_type("FP_SUBNORMAL")
-        .hide_type("FP_NORMAL");
+        .blacklist_type("FP_NAN")
+        .blacklist_type("FP_INFINITE")
+        .blacklist_type("FP_ZERO")
+        .blacklist_type("FP_SUBNORMAL")
+        .blacklist_type("FP_NORMAL");
     if cfg!(feature = "unstable") {
         builder = builder.clang_arg("-DWLR_USE_UNSTABLE");
     }
@@ -192,7 +192,6 @@ fn generate_protocols() {
             "gamma_control"
         ),
         ("./wlroots/protocol/wlr-screencopy-unstable-v1.xml", "screencopy"),
-        ("./wlroots/protocol/screenshooter.xml", "screenshooter"),
         ("./wlroots/protocol/idle.xml", "idle")
     ];
 
