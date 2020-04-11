@@ -26,6 +26,7 @@ wayland-sys = { version = "0.21.*", features = ["dlopen", "server"] }
 [features]
 default = ["libcap", "systemd", "elogind", "xwayland", "x11_backend"]
 static = ["meson"]
+withpixman = []
 libcap = []
 systemd = []
 elogind = []

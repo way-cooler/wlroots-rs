@@ -2,14 +2,17 @@
 
 #include <wlr/util/edges.h>
 #include <wlr/util/log.h>
-#include <wlr/util/region.h>
-
 #include <wlr/xcursor.h>
 
 #include <xcursor.h>
 
-#ifdef WLR_USE_UNSTABLE
+#ifdef WLR_USE_PIXMAN
+#include <pixman.h>
+#include <wlr/util/region.h>
+#endif
 
+#ifdef WLR_USE_UNSTABLE
+#include <wlr/util/region.h>
 #include <wlr/backend.h>
 #include <wlr/backend/drm.h>
 #include <wlr/backend/headless.h>
@@ -59,8 +62,6 @@
 #include <wlr/types/wlr_xdg_shell_v6.h>
 #include <wlr/types/wlr_xdg_shell.h>
 #include <wlr/types/wlr_xcursor_manager.h>
-
-
 #include <xwayland.h>
 #include <xkbcommon/xkbcommon.h>
 #include <pixman.h>

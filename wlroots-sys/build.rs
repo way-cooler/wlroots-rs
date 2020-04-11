@@ -1,6 +1,6 @@
 extern crate bindgen;
-#[cfg(feature = "static")]
-extern crate meson;
+#[cfg(feature = "static")] //from cargo.toml to be used depends on meson
+extern crate meson; // this one only if static (bara den direkt under)
 extern crate pkg_config;
 extern crate wayland_scanner;
 
@@ -13,7 +13,11 @@ fn main() {
     let protocol_header_path =
         generate_protocol_headers().expect("Could not generate header files for wayland protocols");
     let target_dir = env::var("OUT_DIR").expect("$OUT_DIR not set!");
-    let mut builder = bindgen::builder()
+    let mut builder;
+
+    if cfg!(feature = "withpixman") {
+
+        builder = bindgen::builder()
         .derive_debug(true)
         .derive_default(true)
         .generate_comments(true)
@@ -34,16 +38,50 @@ fn main() {
         .clang_arg(format!("-I{}", protocol_header_path.to_str().unwrap()))
         .clang_arg("-Iwlroots/include/xcursor")
         .clang_arg("-I/usr/include/pixman-1")
+        .clang_arg("-DWLR_USE_PIXMAN")
         // Work around bug https://github.com/rust-lang-nursery/rust-bindgen/issues/687
         .blacklist_type("FP_NAN")
         .blacklist_type("FP_INFINITE")
         .blacklist_type("FP_ZERO")
         .blacklist_type("FP_SUBNORMAL")
         .blacklist_type("FP_NORMAL");
+
+    }
+    else {
+
+    builder = bindgen::builder()
+        .derive_debug(true)
+        .derive_default(true)
+        .generate_comments(true)
+        .header("src/wlroots.h")
+        .whitelist_type(r"^wlr_.*$")
+        .whitelist_type(r"^xkb_.*$")
+        .whitelist_type(r"^XKB_.*$")
+        .whitelist_function(r"^_?wlr_.*$")
+        .whitelist_function(r"^xkb_.*$")
+        .ctypes_prefix("libc")
+        .clang_arg("-Iwlroots/include")
+        .clang_arg("-Iwlroots/include/wlr")
+        // NOTE Necessary because they use the out directory to put
+        // pragma information on what features are available in a header file
+        // titled "config.h"
+        .clang_arg(format!("-I{}{}", target_dir, "/include/"))
+        .clang_arg(format!("-I{}", protocol_header_path.to_str().unwrap()))
+        .clang_arg("-Iwlroots/include/xcursor")
+        // Work around bug https://github.com/rust-lang-nursery/rust-bindgen/issues/687
+        .blacklist_type("FP_NAN")
+        .blacklist_type("FP_INFINITE")
+        .blacklist_type("FP_ZERO")
+        .blacklist_type("FP_SUBNORMAL")
+        .blacklist_type("FP_NORMAL");
+    }
     if cfg!(feature = "unstable") {
         builder = builder.clang_arg("-DWLR_USE_UNSTABLE");
     }
-    if !cfg!(feature = "static") {
+
+
+    if !cfg!(feature = "static") { //i vanliga fall
+
         // config.h won't exist, so make a dummy file.
         // We don't need it because of the following -D defines.
         fs::create_dir_all(format!("{}{}", target_dir, "/include/wlr/"))
@@ -89,6 +127,7 @@ fn main() {
     println!("cargo:rustc-link-lib=dylib=input");
     println!("cargo:rustc-link-lib=dylib=udev");
     println!("cargo:rustc-link-lib=dylib=dbus-1");
+    #[cfg(feature = "withpixman")]
     println!("cargo:rustc-link-lib=dylib=pixman-1");
 
     link_optional_libs();
