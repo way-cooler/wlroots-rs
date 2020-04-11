@@ -13,68 +13,40 @@ fn main() {
     let protocol_header_path =
         generate_protocol_headers().expect("Could not generate header files for wayland protocols");
     let target_dir = env::var("OUT_DIR").expect("$OUT_DIR not set!");
-    let mut builder;
+    let mut builder = bindgen::builder()
+    .derive_debug(true)
+    .derive_default(true)
+    .generate_comments(true)
+    .header("src/wlroots.h")
+    .whitelist_type(r"^wlr_.*$")
+    .whitelist_type(r"^xkb_.*$")
+    .whitelist_type(r"^XKB_.*$")
+    .whitelist_function(r"^_?wlr_.*$")
+    .whitelist_function(r"^xkb_.*$")
+    .ctypes_prefix("libc")
+    .clang_arg("-Iwlroots/include")
+    .clang_arg("-Iwlroots/include/wlr")
+    // NOTE Necessary because they use the out directory to put
+    // pragma information on what features are available in a header file
+    // titled "config.h"
+    .clang_arg(format!("-I{}{}", target_dir, "/include/"))
+    .clang_arg(format!("-I{}", protocol_header_path.to_str().unwrap()))
+    .clang_arg("-Iwlroots/include/xcursor")
+    // Work around bug https://github.com/rust-lang-nursery/rust-bindgen/issues/687
+    .blacklist_type("FP_NAN")
+    .blacklist_type("FP_INFINITE")
+    .blacklist_type("FP_ZERO")
+    .blacklist_type("FP_SUBNORMAL")
+    .blacklist_type("FP_NORMAL");
 
-    if cfg!(feature = "withpixman") {
 
-        builder = bindgen::builder()
-        .derive_debug(true)
-        .derive_default(true)
-        .generate_comments(true)
-        .header("src/wlroots.h")
-        .whitelist_type(r"^wlr_.*$")
-        .whitelist_type(r"^xkb_.*$")
-        .whitelist_type(r"^XKB_.*$")
-        .whitelist_function(r"^_?pixman_.*$")
-        .whitelist_function(r"^_?wlr_.*$")
-        .whitelist_function(r"^xkb_.*$")
-        .ctypes_prefix("libc")
-        .clang_arg("-Iwlroots/include")
-        .clang_arg("-Iwlroots/include/wlr")
-        // NOTE Necessary because they use the out directory to put
-        // pragma information on what features are available in a header file
-        // titled "config.h"
-        .clang_arg(format!("-I{}{}", target_dir, "/include/"))
-        .clang_arg(format!("-I{}", protocol_header_path.to_str().unwrap()))
-        .clang_arg("-Iwlroots/include/xcursor")
-        .clang_arg("-I/usr/include/pixman-1")
-        .clang_arg("-DWLR_USE_PIXMAN")
-        // Work around bug https://github.com/rust-lang-nursery/rust-bindgen/issues/687
-        .blacklist_type("FP_NAN")
-        .blacklist_type("FP_INFINITE")
-        .blacklist_type("FP_ZERO")
-        .blacklist_type("FP_SUBNORMAL")
-        .blacklist_type("FP_NORMAL");
-
+    if cfg!(feature = "pixman") {
+        builder=builder.whitelist_function(r"^_?pixman_.*$");
+        builder=builder.clang_arg("-I/usr/include/pixman-1");
+        builder=builder.clang_arg("-DWLR_USE_PIXMAN");
+        
     }
-    else {
-
-    builder = bindgen::builder()
-        .derive_debug(true)
-        .derive_default(true)
-        .generate_comments(true)
-        .header("src/wlroots.h")
-        .whitelist_type(r"^wlr_.*$")
-        .whitelist_type(r"^xkb_.*$")
-        .whitelist_type(r"^XKB_.*$")
-        .whitelist_function(r"^_?wlr_.*$")
-        .whitelist_function(r"^xkb_.*$")
-        .ctypes_prefix("libc")
-        .clang_arg("-Iwlroots/include")
-        .clang_arg("-Iwlroots/include/wlr")
-        // NOTE Necessary because they use the out directory to put
-        // pragma information on what features are available in a header file
-        // titled "config.h"
-        .clang_arg(format!("-I{}{}", target_dir, "/include/"))
-        .clang_arg(format!("-I{}", protocol_header_path.to_str().unwrap()))
-        .clang_arg("-Iwlroots/include/xcursor")
-        // Work around bug https://github.com/rust-lang-nursery/rust-bindgen/issues/687
-        .blacklist_type("FP_NAN")
-        .blacklist_type("FP_INFINITE")
-        .blacklist_type("FP_ZERO")
-        .blacklist_type("FP_SUBNORMAL")
-        .blacklist_type("FP_NORMAL");
-    }
+ 
     if cfg!(feature = "unstable") {
         builder = builder.clang_arg("-DWLR_USE_UNSTABLE");
     }
