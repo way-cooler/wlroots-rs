@@ -1,6 +1,6 @@
 extern crate bindgen;
 #[cfg(feature = "static")] //from cargo.toml to be used depends on meson
-extern crate meson; // this one only if static (bara den direkt under)
+extern crate meson; 
 extern crate pkg_config;
 extern crate wayland_scanner;
 
@@ -99,7 +99,7 @@ fn main() {
     println!("cargo:rustc-link-lib=dylib=input");
     println!("cargo:rustc-link-lib=dylib=udev");
     println!("cargo:rustc-link-lib=dylib=dbus-1");
-    #[cfg(feature = "withpixman")]
+    #[cfg(feature = "pixman")]
     println!("cargo:rustc-link-lib=dylib=pixman-1");
 
     link_optional_libs();
@@ -139,14 +139,21 @@ fn meson() {
         println!("cargo:rustc-link-search=native={}/backend/x11", build_path_str);
         println!("cargo:rustc-link-search=native={}/render/", build_path_str);
 
-        println!("cargo:rustc-link-lib=static=wlr_util");
-        println!("cargo:rustc-link-lib=static=wlr_types");
-        println!("cargo:rustc-link-lib=static=wlr_xcursor");
-        println!("cargo:rustc-link-lib=static=wlr_xwayland");
-        println!("cargo:rustc-link-lib=static=wlr_backend");
-        println!("cargo:rustc-link-lib=static=wlr_backend_x11");
-        println!("cargo:rustc-link-lib=static=wlr_render");
-        println!("cargo:rustc-link-lib=static=wl_protos");
+        //below not used in wlroots 0.10.0 only in older versions
+        //println!("cargo:rustc-link-lib=static=wlr_util");
+        //println!("cargo:rustc-link-lib=static=wlr_types");
+        //println!("cargo:rustc-link-lib=static=wlr_xcursor");
+        //println!("cargo:rustc-link-lib=static=wlr_xwayland");
+        //println!("cargo:rustc-link-lib=static=wlr_backend");
+        //println!("cargo:rustc-link-lib=static=wlr_backend_x11");
+        //println!("cargo:rustc-link-lib=static=wlr_render");
+        //println!("cargo:rustc-link-lib=static=wl_protos");
+    }
+
+    if Path::new("wayland").exists() {
+        meson::build("wayland", build_path_str);
+    } else {
+        panic!("The `wayland` submodule does not exist");
     }
 
     if Path::new("wlroots").exists() {
