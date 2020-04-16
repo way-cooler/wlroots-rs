@@ -196,19 +196,20 @@ fn generate_protocols() {
     ];
 
     for protocol in protocols {
-        wayland_scanner::generate_c_code(
+        wayland_scanner::generate_code(
             protocol.0,
             output_dir.join(format!("{}_server_api.rs", protocol.1)),
             wayland_scanner::Side::Server
         );
-        wayland_scanner::generate_c_code(
+        wayland_scanner::generate_code(
             protocol.0,
             output_dir.join(format!("{}_client_api.rs", protocol.1)),
             wayland_scanner::Side::Client
         );
-        wayland_scanner::generate_c_interfaces(
+        wayland_scanner::generate_code(
             protocol.0,
-            output_dir.join(format!("{}_interfaces.rs", protocol.1))
+            output_dir.join(format!("{}_interfaces.rs", protocol.1)),
+            wayland_scanner::Side::Server
         );
     }
 }
