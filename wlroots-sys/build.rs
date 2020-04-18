@@ -9,6 +9,11 @@ use std::process::Command;
 use std::{env, fs, io};
 
 fn main() {
+
+    println!("cargo:rerun-if-changed=src/lib.rs");
+    println!("cargo:rerun-if-changed=src/wlroots.h");
+    println!("cargo:rerun-if-changed=wlroots");
+
     meson();
     let protocol_header_path =
         generate_protocol_headers().expect("Could not generate header files for wayland protocols");
