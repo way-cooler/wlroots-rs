@@ -109,11 +109,14 @@ fn meson() {}
 
 #[cfg(feature = "static")]
 fn meson() {
-    let build_path = PathBuf::from(env::var("OUT_DIR").expect("Could not get OUT_DIR env variable"));
-    build_path.join("build");
+    let build_path = PathBuf::from(env::var("OUT_DIR")
+        .expect("Could not get OUT_DIR env variable"))
+        .join("build");
+
     let build_path_str = build_path
         .to_str()
         .expect("Could not turn build path into a string");
+    
     println!("cargo:rustc-link-search=native=wlroots");
     println!("cargo:rustc-link-search=native={}/lib", build_path_str);
     println!("cargo:rustc-link-search=native={}/lib64", build_path_str);
