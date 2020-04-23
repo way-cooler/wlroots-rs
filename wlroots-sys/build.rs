@@ -4,9 +4,11 @@ extern crate llvm_config;
 extern crate meson;
 extern crate pkg_config;
 extern crate wayland_scanner;
+extern crate expat_sys;
+
 
 use std::path::{Path, PathBuf};
-use std::process::Command;
+use std::process::{Command, exit};
 use std::{env, fs, io};
 
 fn main() {
@@ -75,7 +77,7 @@ fn main() {
                 ),
                 format!("-DWLR_HAS_XCB_ICCCM={}", cfg!(feature = "xcb_icccm") as u8),
             ]
-            .iter(),
+                .iter(),
         )
     }
     let generated = builder.generate().unwrap();
@@ -123,6 +125,7 @@ fn package_error(command: String) -> String {
         "wayland-protocols".to_string(),
         "--version".to_string(),
         "0".to_string(),
+        true
     ) && "wayland-protocols" == command
     {
         println!("wayland-protocols found");
@@ -136,36 +139,193 @@ fn package_error(command: String) -> String {
     return "".to_string();
 }
 
-/// Checks if a specific package is installed in system PATH or pkg-config
-/// if no min_version is needed use "0" as arg.
-fn check_version(command: String, arg: String, min_version: String) -> bool {
-    if let Ok(_lib_details) = pkg_config::Config::new()
-        .atleast_version(&min_version.clone())
-        .probe(&command.clone())
+// STATIC BUILD CHECK
+fn package_error_static() {
+    if check_version(
+        "pkg-config".to_string(),
+        "--version".to_string(),
+        "0".to_string(),
+        false
+    )
     {
-        if min_version == "0".to_string() {
-            println!("{:?} was found located in pkg-config", command);
-        } else {
-            println!(
-                "{:?} min version {:?} was found located in pkg-config",
-                command, min_version
-            );
-        }
-
-        return true;
+        println!("pkg-config found");
     } else {
-        if min_version == "0".to_string() {
-            println!("{:?} was not found located in pkg-config", command);
-        } else {
-            println!(
-                "{:?} min version {:?} was found located in pkg-config",
-                command, min_version
-            );
-        }
+        println!("WRONG version of pkg-config or not installed on system.");
 
-        println!("if it is installed, try export PKG_CONFIG_PATH=/usr/lib/PATH_TO_PC/lib/:$PKG_CONFIG_PATH where .pc file is located");
+        println!("\nInstallation instructions, install with packet manager");
+        println!("STATIC installation cannot rely on Cargo pkg-config ");
+        exit(2);
     }
 
+    if check_version(
+        "ninja".to_string(),
+        "--version".to_string(),
+        "1.9.0".to_string(),
+        true
+    )
+    {
+        println!("ninja found");
+    } else {
+        println!("WRONG version of ninja or not installed on system.");
+
+        println!("\nInstallation instructions, install with packet manager or python3-pip if available");
+        exit(2);
+    }
+
+    if check_version(
+        "meson".to_string(),
+        "--version".to_string(),
+        "0.54.0".to_string(),
+        true
+    )
+    {
+        println!("meson found");
+    } else {
+        println!("WRONG version of meson or not installed on system.");
+
+        println!("\nInstallation instructions, install with packet manager or python3-pip if available");
+        println!("STATIC installation cannot rely on Cargo meson ");
+        exit(2);
+    }
+
+    if check_version(
+        "cmake".to_string(),
+        "--version".to_string(),
+        "3.0".to_string(),
+        true
+    )
+    {
+        println!("cmake found");
+    } else {
+        println!("WRONG version of cmake or not installed on system.");
+
+        println!("\nInstallation instructions, install with packet manager or if available");
+        println!("STATIC installation cannot rely on Cargo cmake ");
+        exit(2);
+    }
+
+    if check_version(
+        "clang".to_string(),
+        "--version".to_string(),
+        "6.0".to_string(),
+        true
+    )
+    {
+        println!("clang found");
+    } else {
+        println!("WRONG version of clang or not installed on system.");
+
+        println!("\nInstallation instructions, install with packet manager");
+        println!("STATIC installation cannot rely on Cargo cmake ");
+        exit(2);
+    }
+
+    if check_version(
+        "pip3".to_string(),
+        "--version".to_string(),
+        "9.0".to_string(),
+        true
+    )
+    {
+        println!("pip3 found");
+    } else {
+        println!("WRONG version of pip3 or not installed on system.");
+
+        println!("\nInstallation instructions, install with packet manager");
+        exit(2);
+    }
+
+    if check_version(
+        "xml2-config".to_string(),
+        "--version".to_string(),
+        "0.0".to_string(),
+        true
+    )
+    {
+        println!("libxml2-dev found");
+    } else {
+        println!("WRONG version of libxml2-dev or not installed on system.");
+
+        println!("\nInstallation instructions, install with packet manager");
+        exit(2);
+    }
+
+    if check_version(
+        "dot".to_string(),
+        "-V".to_string(),
+        "0.0".to_string(),
+        true
+    )
+    {
+        println!("graphviz found");
+    } else {
+        println!("WRONG version of graphviz or not installed on system.");
+
+        println!("\nInstallation instructions, install with packet manager");
+        exit(2);
+    }
+
+
+    if check_version(
+        "wayland-scanner".to_string(),
+        "--version".to_string(),
+        "0.0".to_string(),
+        false
+    )
+    {
+        println!("libwayland-bin found");
+    } else {
+        println!("WRONG version of libwayland-bin or not installed on system.");
+
+        println!("\nInstallation instructions, install with packet manager");
+        exit(2);
+    }
+
+    println!("other dependencies needed: ");
+    println!("libxml2: ");
+    println!("libwayland-bin: ");
+    println!("wayland-protocols ");
+    println!("libffi-dev: ");
+    println!("expat ");
+    println!("graphviz: ");
+    println!("doxygen: ");
+    println!("llvm ");
+    println!("libwayland-bin: ")
+
+}
+
+/// Checks if a specific package is installed in system PATH or pkg-config
+/// if no min_version is needed use "0" as arg.
+fn check_version(command: String, arg: String, min_version: String, first_check: bool) -> bool {
+
+    if first_check {
+        if let Ok(_lib_details) = pkg_config::Config::new()
+            .atleast_version(&min_version.clone())
+            .probe(&command.clone())
+        {
+            if min_version == "0".to_string() {
+                println!("{:?} was found located in pkg-config", command);
+            } else {
+                println!(
+                    "{:?} min version {:?} was not found located in pkg-config",
+                    command, min_version
+                );
+            }
+
+            return true;
+        } else {
+            if min_version == "0".to_string() {
+                println!("{:?} was not found located in pkg-config", command);
+            } else {
+                println!(
+                    "{:?} min version {:?} was found located in pkg-config",
+                    command, min_version
+                );
+            }
+
+            println!("if it is installed, try export PKG_CONFIG_PATH=/usr/lib/PATH_TO_PC/lib/:$PKG_CONFIG_PATH where .pc file is located");
+        }
+    }
     //let mut minvec = Vec::new();
     //let mut command_vector = Vec::new();
 
@@ -212,10 +372,9 @@ fn check_version(command: String, arg: String, min_version: String) -> bool {
                 command_vector.push(0);
             }
 
-            ///compares version vector and return true if larger
+            //compares version vector and return true if larger
             let mut counter_compare = 1;
             for (comval, minval) in command_vector.iter().zip(minvec.iter()) {
-                println!("{:?} {:?}", comval, minval);
                 if counter_compare < minvec.len() {
                     if comval > minval {
                         println!("local installation of {:?} {:?} was found, >= version {:?} was not found located in pkg-config", command, command_vector, min_version);
@@ -224,7 +383,7 @@ fn check_version(command: String, arg: String, min_version: String) -> bool {
                     if comval < minval {
                         return false;
                     }
-                //else equal continue....
+                    //else equal continue....
                 } else {
                     return if comval >= minval { true } else { false };
                 }
@@ -312,6 +471,8 @@ fn meson() {
         //println!("cargo:rustc-link-lib=static=wl_protos");
     }
 
+    package_error_static();
+
     if Path::new("wayland").exists() {
         meson::build("wayland", build_path_str);
     } else {
@@ -340,10 +501,10 @@ fn generate_protocol_headers() -> io::Result<PathBuf> {
         "{}/share/wayland-protocols/stable",
         protocols_prefix
     ))?
-    .chain(fs::read_dir(format!(
-        "{}/share/wayland-protocols/unstable",
-        protocols_prefix
-    ))?);
+        .chain(fs::read_dir(format!(
+            "{}/share/wayland-protocols/unstable",
+            protocols_prefix
+        ))?);
     for entry in protocols {
         let entry = entry?;
         for entry in fs::read_dir(entry.path())? {
