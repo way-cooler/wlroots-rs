@@ -16,6 +16,7 @@ meson = { version = "1.0", optional = true }
 wayland-scanner = "0.25.*"
 # For building optional dependencies:
 pkg-config = "0.3.*"
+llvm-config = "0.1.*"
 
 [dependencies]
 libc = "^0.2.*"

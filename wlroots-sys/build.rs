@@ -1,6 +1,7 @@
 extern crate bindgen;
+extern crate llvm_config;
 #[cfg(feature = "static")] //from cargo.toml to be used depends on meson
-extern crate meson; 
+extern crate meson;
 extern crate pkg_config;
 extern crate wayland_scanner;
 
@@ -14,46 +15,42 @@ fn main() {
         generate_protocol_headers().expect("Could not generate header files for wayland protocols");
     let target_dir = env::var("OUT_DIR").expect("$OUT_DIR not set!");
     let mut builder = bindgen::builder()
-    .derive_debug(true)
-    .derive_default(true)
-    .generate_comments(true)
-    .header("src/wlroots.h")
-    .whitelist_type(r"^wlr_.*$")
-    .whitelist_type(r"^xkb_.*$")
-    .whitelist_type(r"^XKB_.*$")
-    .whitelist_function(r"^_?wlr_.*$")
-    .whitelist_function(r"^xkb_.*$")
-    .ctypes_prefix("libc")
-    .clang_arg("-Iwlroots/include")
-    .clang_arg("-Iwlroots/include/wlr")
-    // NOTE Necessary because they use the out directory to put
-    // pragma information on what features are available in a header file
-    // titled "config.h"
-    .clang_arg(format!("-I{}{}", target_dir, "/include/"))
-    .clang_arg(format!("-I{}", protocol_header_path.to_str().unwrap()))
-    .clang_arg("-Iwlroots/include/xcursor")
-    // Work around bug https://github.com/rust-lang-nursery/rust-bindgen/issues/687
-    .blacklist_type("FP_NAN")
-    .blacklist_type("FP_INFINITE")
-    .blacklist_type("FP_ZERO")
-    .blacklist_type("FP_SUBNORMAL")
-    .blacklist_type("FP_NORMAL");
-
+        .derive_debug(true)
+        .derive_default(true)
+        .generate_comments(true)
+        .header("src/wlroots.h")
+        .whitelist_type(r"^wlr_.*$")
+        .whitelist_type(r"^xkb_.*$")
+        .whitelist_type(r"^XKB_.*$")
+        .whitelist_function(r"^_?wlr_.*$")
+        .whitelist_function(r"^xkb_.*$")
+        .ctypes_prefix("libc")
+        .clang_arg("-Iwlroots/include")
+        .clang_arg("-Iwlroots/include/wlr")
+        // NOTE Necessary because they use the out directory to put
+        // pragma information on what features are available in a header file
+        // titled "config.h"
+        .clang_arg(format!("-I{}{}", target_dir, "/include/"))
+        .clang_arg(format!("-I{}", protocol_header_path.to_str().unwrap()))
+        .clang_arg("-Iwlroots/include/xcursor")
+        // Work around bug https://github.com/rust-lang-nursery/rust-bindgen/issues/687
+        .blacklist_type("FP_NAN")
+        .blacklist_type("FP_INFINITE")
+        .blacklist_type("FP_ZERO")
+        .blacklist_type("FP_SUBNORMAL")
+        .blacklist_type("FP_NORMAL");
 
     if cfg!(feature = "pixman") {
-        builder=builder.whitelist_function(r"^_?pixman_.*$");
-        builder=builder.clang_arg("-I/usr/include/pixman-1");
-        builder=builder.clang_arg("-DWLR_USE_PIXMAN");
-        
+        builder = builder.whitelist_function(r"^_?pixman_.*$");
+        builder = builder.clang_arg("-I/usr/include/pixman-1");
+        builder = builder.clang_arg("-DWLR_USE_PIXMAN");
     }
- 
+
     if cfg!(feature = "unstable") {
         builder = builder.clang_arg("-DWLR_USE_UNSTABLE");
     }
 
-
-    if !cfg!(feature = "static") { //i vanliga fall
-
+    if !cfg!(feature = "static") {
         // config.h won't exist, so make a dummy file.
         // We don't need it because of the following -D defines.
         fs::create_dir_all(format!("{}{}", target_dir, "/include/wlr/"))
@@ -67,12 +64,18 @@ fn main() {
                 format!("-DWLR_HAS_LIBCAP={}", cfg!(feature = "libcap") as u8),
                 format!("-DWLR_HAS_SYSTEMD={}", cfg!(feature = "systemd") as u8),
                 format!("-DWLR_HAS_ELOGIND={}", cfg!(feature = "elogind") as u8),
-                format!("-DWLR_HAS_X11_BACKEND={}", cfg!(feature = "x11_backend") as u8),
+                format!(
+                    "-DWLR_HAS_X11_BACKEND={}",
+                    cfg!(feature = "x11_backend") as u8
+                ),
                 format!("-DWLR_HAS_XWAYLAND={}", cfg!(feature = "xwayland") as u8),
-                format!("-DWLR_HAS_XCB_ERRORS={}", cfg!(feature = "xcb_errors") as u8),
-                format!("-DWLR_HAS_XCB_ICCCM={}", cfg!(feature = "xcb_icccm") as u8)
+                format!(
+                    "-DWLR_HAS_XCB_ERRORS={}",
+                    cfg!(feature = "xcb_errors") as u8
+                ),
+                format!("-DWLR_HAS_XCB_ICCCM={}", cfg!(feature = "xcb_icccm") as u8),
             ]
-            .iter()
+            .iter(),
         )
     }
     let generated = builder.generate().unwrap();
@@ -114,13 +117,163 @@ fn main() {
 
     generate_protocols();
 }
+/// prints helpful package installation instructions or error to the user.
+fn package_error(command: String) -> String {
+    if check_version(
+        "wayland-protocols".to_string(),
+        "--version".to_string(),
+        "0".to_string(),
+    ) && "wayland-protocols" == command
+    {
+        println!("wayland-protocols found");
+    } else {
+        println!("WRONG version of wayland-protocols or not installed.");
+
+        println!("\nInstallation instructions, install with packet manager or:");
+        println!("git clone https://github.com/wayland-project/wayland-protocols.git");
+    }
+
+    return "".to_string();
+}
+
+/// Checks if a specific package is installed in system PATH or pkg-config
+/// if no min_version is needed use "0" as arg.
+fn check_version(command: String, arg: String, min_version: String) -> bool {
+    if let Ok(_lib_details) = pkg_config::Config::new()
+        .atleast_version(&min_version.clone())
+        .probe(&command.clone())
+    {
+        if min_version == "0".to_string() {
+            println!("{:?} was found located in pkg-config", command);
+        } else {
+            println!(
+                "{:?} min version {:?} was found located in pkg-config",
+                command, min_version
+            );
+        }
+
+        return true;
+    } else {
+        if min_version == "0".to_string() {
+            println!("{:?} was not found located in pkg-config", command);
+        } else {
+            println!(
+                "{:?} min version {:?} was found located in pkg-config",
+                command, min_version
+            );
+        }
+
+        println!("if it is installed, try export PKG_CONFIG_PATH=/usr/lib/PATH_TO_PC/lib/:$PKG_CONFIG_PATH where .pc file is located");
+    }
+
+    //let mut minvec = Vec::new();
+    //let mut command_vector = Vec::new();
+
+    let minvec = min_version
+        .split(|c| c == ' ' || c == '.')
+        .filter_map(|s| s.parse::<i32>().ok())
+        .collect::<Vec<_>>();
+
+    return if !is_in_path("PATH".to_string(), command.clone()) {
+        println!("\n{:?} was not found in PATH, try export it by:", command);
+        println!("export PATH=/usr/PATH_TO_BIN/bin/:$PATH \n");
+        false
+    } else {
+        let output = Command::new(command.clone())
+            .arg(arg)
+            .output()
+            .unwrap_or_else(|e| panic!("failed to execute process: {}", e));
+
+        if output.status.success() {
+            let mut command_output = String::from_utf8_lossy(&output.stdout);
+
+            let mut command_vector = command_output
+                .split(|c| c == ' ' || c == '.')
+                .filter_map(|s| s.parse::<i32>().ok())
+                .collect::<Vec<_>>();
+
+            if command_vector.is_empty() {
+                command_output = String::from_utf8_lossy(&output.stderr);
+                command_vector = command_output
+                    .split(|c| c == ' ' || c == '.')
+                    .filter_map(|s| s.parse::<i32>().ok())
+                    .collect::<Vec<_>>();
+                if command_vector.is_empty() {
+                    println!("Unable to get version number with --version");
+                    return false;
+                }
+            }
+
+            while command_vector.len() > minvec.len() {
+                command_vector.pop();
+            }
+
+            while minvec.len() > command_vector.len() {
+                command_vector.push(0);
+            }
+
+            ///compares version vector and return true if larger
+            let mut counter_compare = 1;
+            for (comval, minval) in command_vector.iter().zip(minvec.iter()) {
+                println!("{:?} {:?}", comval, minval);
+                if counter_compare < minvec.len() {
+                    if comval > minval {
+                        println!("local installation of {:?} {:?} was found, >= version {:?} was not found located in pkg-config", command, command_vector, min_version);
+                        return true;
+                    }
+                    if comval < minval {
+                        return false;
+                    }
+                //else equal continue....
+                } else {
+                    return if comval >= minval { true } else { false };
+                }
+                counter_compare += 1;
+            }
+        } else {
+            let s = String::from_utf8_lossy(&output.stderr);
+            print!("rustc failed and stderr was:\n{}", s);
+        }
+
+        false
+    };
+}
+
+///help method to locate package in PATH or other env variable
+fn is_in_path(path_dir: String, command: String) -> bool {
+    //                      PATH
+    match env::var_os(path_dir) {
+        Some(paths) => {
+            for path in env::split_paths(&paths) {
+                for entry in fs::read_dir(path).expect("Error reading directory") {
+                    let entry = entry.expect("Could not read entry in directory");
+                    let file_name = entry
+                        .path()
+                        .file_name()
+                        .unwrap()
+                        .to_string_lossy()
+                        .into_owned();
+
+                    if file_name == command {
+                        println!("var {:?} was found in {:?}", command, entry);
+                        return true;
+                    }
+                }
+            }
+        }
+        None => println!("directory is not defined."),
+    }
+
+    return false;
+}
 
 #[cfg(not(feature = "static"))]
 fn meson() {}
 
 #[cfg(feature = "static")]
 fn meson() {
-    let build_path = PathBuf::from(env::var("OUT_DIR").expect("Could not get OUT_DIR env variable"));
+    let build_path =
+        PathBuf::from(env::var("OUT_DIR").expect("Could not get OUT_DIR env variable"));
     build_path.join("build");
     let build_path_str = build_path
         .to_str()
@@ -132,11 +285,20 @@ fn meson() {
     if cfg!(feature = "static") {
         println!("cargo:rustc-link-search=native={}/util/", build_path_str);
         println!("cargo:rustc-link-search=native={}/types/", build_path_str);
-        println!("cargo:rustc-link-search=native={}/protocol/", build_path_str);
+        println!(
+            "cargo:rustc-link-search=native={}/protocol/",
+            build_path_str
+        );
         println!("cargo:rustc-link-search=native={}/xcursor/", build_path_str);
-        println!("cargo:rustc-link-search=native={}/xwayland/", build_path_str);
+        println!(
+            "cargo:rustc-link-search=native={}/xwayland/",
+            build_path_str
+        );
         println!("cargo:rustc-link-search=native={}/backend/", build_path_str);
-        println!("cargo:rustc-link-search=native={}/backend/x11", build_path_str);
+        println!(
+            "cargo:rustc-link-search=native={}/backend/x11",
+            build_path_str
+        );
         println!("cargo:rustc-link-search=native={}/render/", build_path_str);
 
         //below not used in wlroots 0.10.0 only in older versions
@@ -172,10 +334,16 @@ fn generate_protocol_headers() -> io::Result<PathBuf> {
     let output_dir_str = env::var("OUT_DIR").unwrap();
     let out_path: PathBuf = format!("{}/wayland-protocols", output_dir_str).into();
     fs::create_dir(&out_path).ok();
-    let protocols_prefix = pkg_config::get_variable("wayland-protocols", "prefix").unwrap();
-    let protocols = fs::read_dir(format!("{}/share/wayland-protocols/stable", protocols_prefix))?.chain(
-        fs::read_dir(format!("{}/share/wayland-protocols/unstable", protocols_prefix))?
-    );
+    let protocols_prefix = pkg_config::get_variable("wayland-protocols", "prefix")
+        .expect(package_error("wayland-protocols".to_string()).as_ref());
+    let protocols = fs::read_dir(format!(
+        "{}/share/wayland-protocols/stable",
+        protocols_prefix
+    ))?
+    .chain(fs::read_dir(format!(
+        "{}/share/wayland-protocols/unstable",
+        protocols_prefix
+    ))?);
     for entry in protocols {
         let entry = entry?;
         for entry in fs::read_dir(entry.path())? {
@@ -204,30 +372,36 @@ fn generate_protocols() {
     let output_dir = Path::new(&output_dir_str);
 
     let protocols = &[
-        ("./wlroots/protocol/server-decoration.xml", "server_decoration"),
+        (
+            "./wlroots/protocol/server-decoration.xml",
+            "server_decoration",
+        ),
         (
             "./wlroots/protocol/wlr-gamma-control-unstable-v1.xml",
-            "gamma_control"
+            "gamma_control",
         ),
-        ("./wlroots/protocol/wlr-screencopy-unstable-v1.xml", "screencopy"),
-        ("./wlroots/protocol/idle.xml", "idle")
+        (
+            "./wlroots/protocol/wlr-screencopy-unstable-v1.xml",
+            "screencopy",
+        ),
+        ("./wlroots/protocol/idle.xml", "idle"),
     ];
 
     for protocol in protocols {
         wayland_scanner::generate_code(
             protocol.0,
             output_dir.join(format!("{}_server_api.rs", protocol.1)),
-            wayland_scanner::Side::Server
+            wayland_scanner::Side::Server,
         );
         wayland_scanner::generate_code(
             protocol.0,
             output_dir.join(format!("{}_client_api.rs", protocol.1)),
-            wayland_scanner::Side::Client
+            wayland_scanner::Side::Client,
         );
         wayland_scanner::generate_code(
             protocol.0,
             output_dir.join(format!("{}_interfaces.rs", protocol.1)),
-            wayland_scanner::Side::Server
+            wayland_scanner::Side::Server,
         );
     }
 }
