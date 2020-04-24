@@ -610,7 +610,7 @@ fn generate_protocol_headers() -> io::Result<PathBuf> {
                 .arg(path.clone())
                 .arg(format!("{}/{}.h", out_path.to_str().unwrap(), filename))
                 .status()
-                .expect("\n are libwayland-bin installed?  \n"); //here!!
+                .expect("\n are libwayland-bin installed?  \n"); 
         }
     }
     Ok(out_path)
