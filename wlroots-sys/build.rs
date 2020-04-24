@@ -1,9 +1,11 @@
 extern crate bindgen;
 extern crate llvm_config;
-#[cfg(feature = "static")] //from cargo.toml to be used depends on meson
+#[cfg(feature = "static")]
 extern crate meson;
 extern crate pkg_config;
 extern crate wayland_scanner;
+
+#[cfg(feature = "static")]
 extern crate expat_sys;
 
 
@@ -12,6 +14,10 @@ use std::process::{Command, exit};
 use std::{env, fs, io};
 
 fn main() {
+
+    #[cfg(feature = "unstable")]
+    package_error_unstable();
+
     meson();
     let protocol_header_path =
         generate_protocol_headers().expect("Could not generate header files for wayland protocols");
@@ -42,7 +48,7 @@ fn main() {
         .blacklist_type("FP_SUBNORMAL")
         .blacklist_type("FP_NORMAL");
 
-    if cfg!(feature = "pixman") {
+    if cfg!(feature = "pixman") || cfg!(feature = "unstable") {
         builder = builder.whitelist_function(r"^_?pixman_.*$");
         builder = builder.clang_arg("-I/usr/include/pixman-1");
         builder = builder.clang_arg("-DWLR_USE_PIXMAN");
@@ -80,7 +86,7 @@ fn main() {
                 .iter(),
         )
     }
-    let generated = builder.generate().unwrap();
+    let generated = builder.generate().expect(package_error_common_unstable().to_string().as_ref());
 
     println!("cargo:rustc-link-lib=dylib=X11");
     println!("cargo:rustc-link-lib=dylib=X11-xcb");
@@ -106,8 +112,10 @@ fn main() {
     println!("cargo:rustc-link-lib=dylib=dbus-1");
     #[cfg(feature = "pixman")]
     println!("cargo:rustc-link-lib=dylib=pixman-1");
+    #[cfg(feature = "unstable")]
+    println!("cargo:rustc-link-lib=dylib=pixman-1");
 
-    link_optional_libs();
+        link_optional_libs();
 
     if !cfg!(feature = "static") {
         println!("cargo:rustc-link-lib=dylib=wlroots");
@@ -139,7 +147,25 @@ fn package_error(command: String) -> String {
     return "".to_string();
 }
 
+fn package_error_common_unstable() -> String {
+
+    println!("Are the following unstable dependencies installed?");
+    println!("libwayland-dev");
+    println!("libudev-dev");
+    println!("libgles2-mesa-dev");
+    println!("libpixman-1-dev");
+    println!("llvm");
+    println!("libxkbcommon-dev");
+    println!("libxkbcommon-dev");
+    println!("libinput-dev");
+    println!("libinput-bin");
+
+    return "".to_string();
+}
+
+
 // STATIC BUILD CHECK
+#[cfg(feature = "static")]
 fn package_error_static() {
     if check_version(
         "pkg-config".to_string(),
@@ -216,7 +242,7 @@ fn package_error_static() {
         println!("WRONG version of clang or not installed on system.");
 
         println!("\nInstallation instructions, install with packet manager");
-        println!("STATIC installation cannot rely on Cargo cmake ");
+        println!("STATIC installation cannot rely on Cargo clang ");
         exit(2);
     }
 
@@ -396,6 +422,41 @@ fn check_version(command: String, arg: String, min_version: String, first_check:
 
         false
     };
+}
+
+#[cfg(feature = "unstable")]
+fn package_error_unstable() {
+    if check_version(
+        "pkg-config".to_string(),
+        "--version".to_string(),
+        "0".to_string(),
+        false
+    )
+    {
+        println!("pkg-config found");
+    } else {
+        println!("WRONG version of pkg-config or not installed on system.");
+
+        println!("\nInstallation instructions, install with packet manager");
+        println!("STATIC installation cannot rely on Cargo pkg-config ");
+        exit(2);
+    }
+
+    if check_version(
+        "clang".to_string(),
+        "--version".to_string(),
+        "0".to_string(),
+        true
+    )
+    {
+        println!("clang found");
+    } else {
+        println!("WRONG version of clang or not installed on system.");
+
+        println!("\nInstallation instructions, install with packet manager");
+        println!("STATIC installation cannot rely on Cargo clang ");
+        exit(2);
+    }
 }
 
 ///help method to locate package in PATH or other env variable
