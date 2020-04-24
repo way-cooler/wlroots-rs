@@ -15,6 +15,8 @@ use std::{env, fs, io};
 
 fn main() {
 
+    find_pkg_config_clang();
+
     #[cfg(feature = "unstable")]
     package_error_unstable();
 
@@ -149,16 +151,18 @@ fn package_error(command: String) -> String {
 
 fn package_error_common_unstable() -> String {
 
-    println!("Are the following unstable dependencies installed?");
-    println!("libwayland-dev");
-    println!("libudev-dev");
-    println!("libgles2-mesa-dev");
-    println!("libpixman-1-dev");
-    println!("llvm");
-    println!("libxkbcommon-dev");
-    println!("libxkbcommon-dev");
-    println!("libinput-dev");
-    println!("libinput-bin");
+    if cfg!(feature = "unstable") {
+        println!("Are the following unstable dependencies installed?");
+        println!("libwayland-dev");
+        println!("libudev-dev");
+        println!("libgles2-mesa-dev");
+        println!("libpixman-1-dev");
+        println!("llvm");
+        println!("libxkbcommon-dev");
+        println!("libxkbcommon-dev");
+        println!("libinput-dev");
+        println!("libinput-bin");
+    }
 
     return "".to_string();
 }
@@ -179,7 +183,7 @@ fn package_error_static() {
         println!("WRONG version of pkg-config or not installed on system.");
 
         println!("\nInstallation instructions, install with packet manager");
-        println!("STATIC installation cannot rely on Cargo pkg-config ");
+        println!("Installation cannot rely on Cargo pkg-config ");
         exit(2);
     }
 
@@ -424,8 +428,7 @@ fn check_version(command: String, arg: String, min_version: String, first_check:
     };
 }
 
-#[cfg(feature = "unstable")]
-fn package_error_unstable() {
+fn find_pkg_config_clang(){
     if check_version(
         "pkg-config".to_string(),
         "--version".to_string(),
@@ -438,9 +441,34 @@ fn package_error_unstable() {
         println!("WRONG version of pkg-config or not installed on system.");
 
         println!("\nInstallation instructions, install with packet manager");
-        println!("STATIC installation cannot rely on Cargo pkg-config ");
+        println!("Installation cannot rely on Cargo pkg-config ");
         exit(2);
     }
+
+    if check_version(
+        "clang".to_string(),
+        "--version".to_string(),
+        "0.0".to_string(),
+        true
+    )
+    {
+        println!("clang found");
+    } else {
+        println!("WRONG version of clang or not installed on system.");
+
+        println!("\nInstallation instructions, install with packet manager");
+        println!("STATIC installation cannot rely on Cargo clang ");
+        exit(2);
+    }
+
+}
+
+
+
+#[cfg(feature = "unstable")]
+fn package_error_unstable() {
+
+    find_pkg_config_clang();
 
     if check_version(
         "clang".to_string(),
@@ -582,7 +610,7 @@ fn generate_protocol_headers() -> io::Result<PathBuf> {
                 .arg(path.clone())
                 .arg(format!("{}/{}.h", out_path.to_str().unwrap(), filename))
                 .status()
-                .unwrap();
+                .expect("\n are libwayland-bin installed?  \n"); //here!!
         }
     }
     Ok(out_path)
