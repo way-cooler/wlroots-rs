@@ -15,10 +15,16 @@ use std::{env, fs, io};
 
 fn main() {
 
+    println!("cargo:rerun-if-changed=src/lib.rs");
+    println!("cargo:rerun-if-changed=src/wlroots.h");
+    println!("cargo:rerun-if-changed=wlroots");
+
+
     find_pkg_config_clang();
 
     #[cfg(feature = "unstable")]
     package_error_unstable();
+
 
     meson();
     let protocol_header_path =
