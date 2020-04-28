@@ -131,12 +131,8 @@ fn main() {
 }
 /// prints helpful package installation instructions or error to the user.
 fn package_error(command: String) -> String {
-    if check_version(
-        "wayland-protocols".to_string(),
-        "--version".to_string(),
-        "0".to_string(),
-        true
-    ) && "wayland-protocols" == command
+    if check_version("wayland-protocols","--version","0",true)
+        && "wayland-protocols" == command
     {
         println!("wayland-protocols found");
     } else {
@@ -171,12 +167,7 @@ fn package_error_common_unstable() -> String {
 // STATIC BUILD CHECK
 #[cfg(feature = "static")]
 fn package_error_static() {
-    if check_version(
-        "pkg-config".to_string(),
-        "--version".to_string(),
-        "0".to_string(),
-        false
-    )
+    if check_version("pkg-config","--version","0",false)
     {
         println!("pkg-config found");
     } else {
@@ -187,12 +178,7 @@ fn package_error_static() {
         exit(2);
     }
 
-    if check_version(
-        "ninja".to_string(),
-        "--version".to_string(),
-        "1.9.0".to_string(),
-        true
-    )
+    if check_version("ninja","--version","1.9.0",true)
     {
         println!("ninja found");
     } else {
@@ -202,12 +188,7 @@ fn package_error_static() {
         exit(2);
     }
 
-    if check_version(
-        "meson".to_string(),
-        "--version".to_string(),
-        "0.54.0".to_string(),
-        true
-    )
+    if check_version("meson","--version","0.54.0",true)
     {
         println!("meson found");
     } else {
@@ -218,12 +199,7 @@ fn package_error_static() {
         exit(2);
     }
 
-    if check_version(
-        "cmake".to_string(),
-        "--version".to_string(),
-        "3.0".to_string(),
-        true
-    )
+    if check_version("cmake","--version","3.0",true)
     {
         println!("cmake found");
     } else {
@@ -234,12 +210,7 @@ fn package_error_static() {
         exit(2);
     }
 
-    if check_version(
-        "clang".to_string(),
-        "--version".to_string(),
-        "6.0".to_string(),
-        true
-    )
+    if check_version("clang","--version","6.0",true)
     {
         println!("clang found");
     } else {
@@ -250,12 +221,7 @@ fn package_error_static() {
         exit(2);
     }
 
-    if check_version(
-        "pip3".to_string(),
-        "--version".to_string(),
-        "9.0".to_string(),
-        true
-    )
+    if check_version("pip3","--version","9.0",true)
     {
         println!("pip3 found");
     } else {
@@ -265,12 +231,7 @@ fn package_error_static() {
         exit(2);
     }
 
-    if check_version(
-        "xml2-config".to_string(),
-        "--version".to_string(),
-        "0.0".to_string(),
-        true
-    )
+    if check_version("xml2-config","--version","0.0",true)
     {
         println!("libxml2-dev found");
     } else {
@@ -280,12 +241,7 @@ fn package_error_static() {
         exit(2);
     }
 
-    if check_version(
-        "dot".to_string(),
-        "-V".to_string(),
-        "0.0".to_string(),
-        true
-    )
+    if check_version("dot","-V","0.0",true)
     {
         println!("graphviz found");
     } else {
@@ -296,12 +252,7 @@ fn package_error_static() {
     }
 
 
-    if check_version(
-        "wayland-scanner".to_string(),
-        "--version".to_string(),
-        "0.0".to_string(),
-        false
-    )
+    if check_version("wayland-scanner","--version","0.0",false)
     {
         println!("libwayland-bin found");
     } else {
@@ -326,7 +277,7 @@ fn package_error_static() {
 
 /// Checks if a specific package is installed in system PATH or pkg-config
 /// if no min_version is needed use "0" as arg.
-fn check_version(command: String, arg: String, min_version: String, first_check: bool) -> bool {
+fn check_version(command: &str, arg: &str, min_version: &str, first_check: bool) -> bool {
 
     if first_check {
         if let Ok(_lib_details) = pkg_config::Config::new()
@@ -364,7 +315,7 @@ fn check_version(command: String, arg: String, min_version: String, first_check:
         .filter_map(|s| s.parse::<i32>().ok())
         .collect::<Vec<_>>();
 
-    return if !is_in_path("PATH".to_string(), command.clone()) {
+    return if !is_in_path("PATH".to_string(), command) {
         println!("\n{:?} was not found in PATH, try export it by:", command);
         println!("export PATH=/usr/PATH_TO_BIN/bin/:$PATH \n");
         false
@@ -429,12 +380,7 @@ fn check_version(command: String, arg: String, min_version: String, first_check:
 }
 
 fn find_pkg_config_clang(){
-    if check_version(
-        "pkg-config".to_string(),
-        "--version".to_string(),
-        "0".to_string(),
-        false
-    )
+    if check_version("pkg-config","--version","0",false)
     {
         println!("pkg-config found");
     } else {
@@ -445,12 +391,7 @@ fn find_pkg_config_clang(){
         exit(2);
     }
 
-    if check_version(
-        "clang".to_string(),
-        "--version".to_string(),
-        "0.0".to_string(),
-        true
-    )
+    if check_version("clang","--version","0.0",true)
     {
         println!("clang found");
     } else {
@@ -470,12 +411,7 @@ fn package_error_unstable() {
 
     find_pkg_config_clang();
 
-    if check_version(
-        "clang".to_string(),
-        "--version".to_string(),
-        "0".to_string(),
-        true
-    )
+    if check_version("clang","--version","0",true)
     {
         println!("clang found");
     } else {
@@ -488,7 +424,7 @@ fn package_error_unstable() {
 }
 
 ///help method to locate package in PATH or other env variable
-fn is_in_path(path_dir: String, command: String) -> bool {
+fn is_in_path(path_dir: String, command: &str) -> bool {
     //                      PATH
     match env::var_os(path_dir) {
         Some(paths) => {
@@ -502,7 +438,7 @@ fn is_in_path(path_dir: String, command: String) -> bool {
                         .to_string_lossy()
                         .into_owned();
 
-                    if file_name == command {
+                    if file_name == command.to_string() {
                         println!("var {:?} was found in {:?}", command, entry);
                         return true;
                     }
@@ -610,7 +546,7 @@ fn generate_protocol_headers() -> io::Result<PathBuf> {
                 .arg(path.clone())
                 .arg(format!("{}/{}.h", out_path.to_str().unwrap(), filename))
                 .status()
-                .expect("\n are libwayland-bin installed?  \n"); 
+                .expect("\nerror with package libwayland-bin\n");
         }
     }
     Ok(out_path)
