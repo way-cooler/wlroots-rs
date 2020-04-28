@@ -1,3 +1,6 @@
 [submodule "wlroots-sys/wlroots"]
 	path = wlroots-sys/wlroots
 	url = https://github.com/SirCmpwn/wlroots
+[submodule "wlroots-sys/wayland"]
+	path = wlroots-sys/wayland
+	url = https://github.com/wayland-project/wayland.git
