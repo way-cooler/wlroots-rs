@@ -191,13 +191,21 @@ fn generate_protocols() {
     let output_dir = Path::new(&output_dir_str);
 
     let protocols = &[
-        ("./wlroots/protocol/server-decoration.xml", "server_decoration"),
-        (
-            "./wlroots/protocol/wlr-gamma-control-unstable-v1.xml",
-            "gamma_control"
-        ),
-        ("./wlroots/protocol/wlr-screencopy-unstable-v1.xml", "screencopy"),
-        ("./wlroots/protocol/idle.xml", "idle")
+        ("./wlroots/protocol/server-decoration.xml","server_decoration",),
+        ("./wlroots/protocol/wlr-gamma-control-unstable-v1.xml","gamma_control",),
+        ("./wlroots/protocol/wlr-screencopy-unstable-v1.xml","screencopy",),
+        ("./wlroots/protocol/gtk-primary-selection.xml", "gtk_primary_selection",),
+        ("./wlroots/protocol/input-method-unstable-v2.xml", "input_method",),
+        ("./wlroots/protocol/virtual-keyboard-unstable-v1.xml", "virtual_keyboard",),
+        ("./wlroots/protocol/wlr-data-control-unstable-v1.xml", "data_control",),
+        ("./wlroots/protocol/wlr-export-dmabuf-unstable-v1.xml", "export_dmabuf",),
+        ("./wlroots/protocol/wlr-foreign-toplevel-management-unstable-v1.xml", "foreign_toplevel_management",),
+        ("./wlroots/protocol/wlr-input-inhibitor-unstable-v1.xml", "input_inhibitor",),
+        ("./wlroots/protocol/wlr-layer-shell-unstable-v1.xml", "layer_shell",),
+        ("./wlroots/protocol/wlr-output-management-unstable-v1.xml", "output_management",),
+        ("./wlroots/protocol/wlr-output-power-management-unstable-v1.xml", "output_power_management",),
+        ("./wlroots/protocol/wlr-virtual-pointer-unstable-v1.xml", "virtual_pointer",),
+        ("./wlroots/protocol/idle.xml", "idle"),
     ];
 
     for protocol in protocols {
