@@ -27,6 +27,7 @@ fn main() {
         .ctypes_prefix("libc")
         .clang_arg("-Iwlroots/include")
         .clang_arg("-Iwlroots/include/wlr")
+
         // NOTE Necessary because they use the out directory to put
         // pragma information on what features are available in a header file
         // titled "config.h"
@@ -109,6 +110,10 @@ fn meson() {}
 
 #[cfg(feature = "static")]
 fn meson() {
+    if !Path::new("wlroots").exists(){
+        panic!("The `wlroots` submodule does not exist");
+    }
+
     let build_path = PathBuf::from(env::var("OUT_DIR")
         .expect("Could not get OUT_DIR env variable"))
         .join("build");
@@ -121,30 +126,32 @@ fn meson() {
     println!("cargo:rustc-link-search=native={}/lib", build_path_str);
     println!("cargo:rustc-link-search=native={}/lib64", build_path_str);
     println!("cargo:rustc-link-search=native={}/build/", build_path_str);
-    if cfg!(feature = "static") {
-        println!("cargo:rustc-link-search=native={}/util/", build_path_str);
-        println!("cargo:rustc-link-search=native={}/types/", build_path_str);
-        println!("cargo:rustc-link-search=native={}/protocol/", build_path_str);
-        println!("cargo:rustc-link-search=native={}/xcursor/", build_path_str);
-        println!("cargo:rustc-link-search=native={}/xwayland/", build_path_str);
-        println!("cargo:rustc-link-search=native={}/backend/", build_path_str);
-        println!("cargo:rustc-link-search=native={}/backend/x11", build_path_str);
-        println!("cargo:rustc-link-search=native={}/render/", build_path_str);
 
-        println!("cargo:rustc-link-lib=static=wlr_util");
-        println!("cargo:rustc-link-lib=static=wlr_types");
-        println!("cargo:rustc-link-lib=static=wlr_xcursor");
-        println!("cargo:rustc-link-lib=static=wlr_xwayland");
-        println!("cargo:rustc-link-lib=static=wlr_backend");
-        println!("cargo:rustc-link-lib=static=wlr_backend_x11");
-        println!("cargo:rustc-link-lib=static=wlr_render");
-        println!("cargo:rustc-link-lib=static=wl_protos");
+    let mut meson_config_status = None;
+
+    if cfg!(feature = "static") {
+        println!("cargo:rustc-link-lib=static=wlroots");
+        println!("cargo:rustc-link-search=native={}/", build_path_str);
+
+        meson_config_status = Some(
+            Command::new("meson")
+                .current_dir("wlroots")
+                .arg(".")
+                .arg(build_path_str)
+                .arg("-Ddefault_library=static")
+                .spawn()
+                .expect("Static compilation failed: Is meson installed?")
+                .wait()
+        );
     }
 
-    if Path::new("wlroots").exists() {
-        meson::build("wlroots", build_path_str);
-    } else {
-        panic!("The `wlroots` submodule does not exist");
+    match meson_config_status
+    {
+        None | Some(Ok(_)) => meson::build("wlroots", build_path_str),
+        Some(Err(exit_status)) => println!(
+            "Static compilation failed: Meson configuration failed with {}",
+            exit_status
+        )
     }
 }
 
