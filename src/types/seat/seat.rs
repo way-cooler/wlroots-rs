@@ -13,22 +13,7 @@ use std::{
 use crate::libc;
 use crate::wayland_sys::server::{signal::wl_signal_add, WAYLAND_SERVER_HANDLE};
 pub use wlroots_sys::wayland_server::protocol::wl_seat::Capability;
-use wlroots_sys::{
-    wlr_axis_orientation, wlr_axis_source, wlr_seat, wlr_seat_create, wlr_seat_destroy,
-    wlr_seat_get_keyboard, wlr_seat_keyboard_clear_focus, wlr_seat_keyboard_end_grab,
-    wlr_seat_keyboard_enter, wlr_seat_keyboard_has_grab, wlr_seat_keyboard_notify_enter,
-    wlr_seat_keyboard_notify_key, wlr_seat_keyboard_notify_modifiers, wlr_seat_keyboard_send_key,
-    wlr_seat_keyboard_send_modifiers, wlr_seat_keyboard_start_grab, wlr_seat_pointer_clear_focus,
-    wlr_seat_pointer_end_grab, wlr_seat_pointer_enter, wlr_seat_pointer_has_grab,
-    wlr_seat_pointer_notify_axis, wlr_seat_pointer_notify_button, wlr_seat_pointer_notify_enter,
-    wlr_seat_pointer_notify_motion, wlr_seat_pointer_request_set_cursor_event, wlr_seat_pointer_send_axis,
-    wlr_seat_pointer_send_button, wlr_seat_pointer_send_motion, wlr_seat_pointer_start_grab,
-    wlr_seat_pointer_surface_has_focus, wlr_seat_set_capabilities, wlr_seat_set_keyboard, wlr_seat_set_name,
-    wlr_seat_touch_end_grab, wlr_seat_touch_get_point, wlr_seat_touch_has_grab, wlr_seat_touch_notify_down,
-    wlr_seat_touch_notify_motion, wlr_seat_touch_notify_up, wlr_seat_touch_num_points,
-    wlr_seat_touch_point_clear_focus, wlr_seat_touch_point_focus, wlr_seat_touch_send_down,
-    wlr_seat_touch_send_motion, wlr_seat_touch_send_up, wlr_seat_touch_start_grab
-};
+use wlroots_sys::{wlr_axis_orientation, wlr_axis_source, wlr_seat, wlr_seat_create, wlr_seat_destroy, wlr_seat_get_keyboard, wlr_seat_keyboard_clear_focus, wlr_seat_keyboard_end_grab, wlr_seat_keyboard_enter, wlr_seat_keyboard_has_grab, wlr_seat_keyboard_notify_enter, wlr_seat_keyboard_notify_key, wlr_seat_keyboard_notify_modifiers, wlr_seat_keyboard_send_key, wlr_seat_keyboard_send_modifiers, wlr_seat_keyboard_start_grab, wlr_seat_pointer_clear_focus, wlr_seat_pointer_end_grab, wlr_seat_pointer_enter, wlr_seat_pointer_has_grab, wlr_seat_pointer_notify_axis, wlr_seat_pointer_notify_button, wlr_seat_pointer_notify_enter, wlr_seat_pointer_notify_motion, wlr_seat_pointer_request_set_cursor_event, wlr_seat_pointer_send_axis, wlr_seat_pointer_send_button, wlr_seat_pointer_send_motion, wlr_seat_pointer_start_grab, wlr_seat_pointer_surface_has_focus, wlr_seat_set_capabilities, wlr_seat_set_keyboard, wlr_seat_set_name, wlr_seat_touch_end_grab, wlr_seat_touch_get_point, wlr_seat_touch_has_grab, wlr_seat_touch_notify_down, wlr_seat_touch_notify_motion, wlr_seat_touch_notify_up, wlr_seat_touch_num_points, wlr_seat_touch_point_clear_focus, wlr_seat_touch_point_focus, wlr_seat_touch_send_down, wlr_seat_touch_send_motion, wlr_seat_touch_send_up, wlr_seat_touch_start_grab, wlr_button_state};
 use xkbcommon::xkb::Keycode;
 
 pub use crate::events::seat_events as event;
@@ -461,7 +446,7 @@ impl Seat {
     ///
     /// Compositors should use `Seat::notify_button` to
     /// send button events to respect pointer grabs.
-    pub fn send_button(&self, time: Duration, button: u32, state: u32) -> u32 {
+    pub fn send_button(&self, time: Duration, button: u32, state: wlr_button_state) -> u32 {
         unsafe { wlr_seat_pointer_send_button(self.data.0, time.to_ms(), button, state) }
     }
 
@@ -527,8 +512,9 @@ impl Seat {
     ///
     /// Returns the serial of the button press or zero if no button press was
     /// sent.
-    pub fn pointer_notify_button(&self, time: Duration, button: u32, state: u32) -> u32 {
+    pub fn pointer_notify_button(&self, time: Duration, button: u32, state: wlr_button_state) -> u32 {
         unsafe { wlr_seat_pointer_notify_button(self.data.0, time.to_ms(), button, state) }
+
     }
 
     /// Notify the seat of an axis event.
