@@ -1,7 +1,7 @@
 //! TODO Documentation
 
 use wlroots_sys::{
-    wl_display, wlr_data_device_manager, wlr_data_device_manager_create, wlr_data_device_manager_destroy
+    wl_display, wlr_data_device_manager, wlr_data_device_manager_create
 };
 
 /// Global for the data device manager global for a certain display.
@@ -19,11 +19,5 @@ impl Manager {
         } else {
             Some(Manager { manager })
         }
-    }
-}
-
-impl Drop for Manager {
-    fn drop(&mut self) {
-        unsafe { wlr_data_device_manager_destroy(self.manager) }
     }
 }
