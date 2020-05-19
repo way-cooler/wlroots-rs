@@ -23,7 +23,7 @@ use crate::{
     backend::{self, Backend, Session, UnsafeRenderSetupFunction},
     data_device,
     extensions::{
-        gamma_control, gtk_primary_selection, idle, idle_inhibit, input_inhibit, screencopy, screenshooter,
+        gamma_control, gtk_primary_selection, idle, idle_inhibit, input_inhibit, screencopy,
         server_decoration
     },
     input, output,
@@ -137,8 +137,6 @@ pub struct Compositor {
     pub gtk_primary_selection_manager: Option<gtk_primary_selection::Manager>,
     /// Optional screencopy manager extension
     pub screencopy_manager: Option<screencopy::ZManagerV1>,
-    /// Optional screenshooter manager extension
-    pub screenshooter: Option<screenshooter::Screenshooter>,
     /// The renderer used to draw things to the screen.
     pub renderer: Option<GenericRenderer>,
     /// XWayland server, only Some if it is enabled
@@ -172,7 +170,6 @@ pub struct Builder {
     input_inhibit_manager: bool,
     gtk_primary_selection_manager: bool,
     screencopy_manager: bool,
-    screenshooter: bool,
     wayland_remote: Option<String>,
     x11_display: Option<String>,
     data_device_manager: bool,
@@ -306,13 +303,6 @@ impl Builder {
     /// extension.
     pub fn screencopy_manager(mut self, screencopy_manager: bool) -> Self {
         self.screencopy_manager = screencopy_manager;
-        self
-    }
-
-    /// Decide whether or not to enable the screenshooter protocol
-    /// extension.
-    pub fn screenshooter(mut self, screenshooter: bool) -> Self {
-        self.screenshooter = screenshooter;
         self
     }
 
@@ -518,11 +508,6 @@ impl Builder {
         } else {
             None
         };
-        let screenshooter = if self.screenshooter {
-            screenshooter::Screenshooter::new(display)
-        } else {
-            None
-        };
         let data_device_manager = if self.data_device_manager {
             data_device::Manager::new(display as _)
         } else {
@@ -634,7 +619,6 @@ impl Builder {
             input_inhibit_manager,
             gtk_primary_selection_manager,
             screencopy_manager,
-            screenshooter,
             renderer,
             xwayland,
             user_terminate,
