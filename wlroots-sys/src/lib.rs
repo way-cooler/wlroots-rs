@@ -14,6 +14,7 @@ pub use wayland_sys::{
 };
 
 pub use self::generated::root::*;
+pub use self::generated::protocols as protocols;
 
 #[allow(non_camel_case_types, non_snake_case, non_upper_case_globals)]
 mod generated {
