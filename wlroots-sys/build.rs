@@ -7,6 +7,7 @@ extern crate wayland_scanner;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::{env, fs, io};
+use bindgen::EnumVariation;
 
 fn main() {
     meson();
@@ -40,7 +41,12 @@ fn main() {
         .blacklist_type("FP_INFINITE")
         .blacklist_type("FP_ZERO")
         .blacklist_type("FP_SUBNORMAL")
-        .blacklist_type("FP_NORMAL");
+        .blacklist_type("FP_NORMAL")
+        .default_enum_style(EnumVariation::Rust { non_exhaustive: false })
+        .enable_function_attribute_detection()
+        .enable_cxx_namespaces()
+        .size_t_is_usize(true);
+
     if cfg!(feature = "unstable") {
         builder = builder.clang_arg("-DWLR_USE_UNSTABLE");
     }
