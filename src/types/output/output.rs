@@ -184,13 +184,13 @@ impl Output {
     // What will happen?
 
     /// Set this to be the current mode for the Output.
-    pub fn set_mode(&mut self, mode: output::Mode) -> bool {
-        unsafe { wlr_output_set_mode(self.output.as_ptr(), mode.as_ptr()) }
+    pub fn set_mode(&mut self, mode: output::Mode)  {
+        unsafe { wlr_output_set_mode(self.output.as_ptr(), mode.as_ptr()); }
     }
 
     /// Set a custom mode for this output.
-    pub fn set_custom_mode(&mut self, size: Size, refresh: i32) -> bool {
-        unsafe { wlr_output_set_custom_mode(self.output.as_ptr(), size.width, size.height, refresh) }
+    pub fn set_custom_mode(&mut self, size: Size, refresh: i32)  {
+        unsafe { wlr_output_set_custom_mode(self.output.as_ptr(), size.width, size.height, refresh); }
     }
 
     /// Gets the name of the output in UTF-8.
@@ -441,8 +441,8 @@ impl Output {
     }
 
     /// Enables or disables an output.
-    pub fn enable(&mut self, enable: bool) -> bool {
-        unsafe { wlr_output_enable(self.output.as_ptr(), enable) }
+    pub fn enable(&mut self, enable: bool) {
+        unsafe { wlr_output_enable(self.output.as_ptr(), enable); }
     }
 
     /// Sets the gamma based on the size.
