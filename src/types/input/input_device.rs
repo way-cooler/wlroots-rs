@@ -99,7 +99,7 @@ impl Device {
                     Handle::TabletPad(tablet_pad::Handle::from_ptr(tablet_pad_ptr))
                 },
                 WLR_INPUT_DEVICE_SWITCH => {
-                    let switch_ptr = self.device.as_ref().__bindgen_anon_1.lid_switch;
+                    let switch_ptr = self.device.as_ref().__bindgen_anon_1.switch_device;
                     Handle::Switch(switch::Handle::from_ptr(switch_ptr))
                 }
             }

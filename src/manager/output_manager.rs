@@ -105,9 +105,9 @@ wayland_listener_static! {
                               output.scale_listener() as _);
                 wl_signal_add(&mut (*data).events.transform as *mut _ as _,
                               output.transform_listener() as _);
-                wl_signal_add(&mut (*data).events.swap_buffers as *mut _ as _,
+                wl_signal_add(&mut (*data).events.precommit as *mut _ as _,
                               output.swap_buffers_listener() as _);
-                wl_signal_add(&mut (*data).events.needs_swap as *mut _ as _,
+                wl_signal_add(&mut (*data).events.damage as *mut _ as _,
                               output.need_swap_listener() as _);
                 wl_signal_add(&mut (*data).events.destroy as *mut _ as _,
                               output.on_destroy_listener() as _);

@@ -4,7 +4,7 @@ use crate::libc::clock_t;
 use wlroots_sys::{
     timespec, wlr_output, wlr_output_damage, wlr_output_damage_add, wlr_output_damage_add_box,
     wlr_output_damage_add_whole, wlr_output_damage_create, wlr_output_damage_destroy,
-    wlr_output_damage_make_current, wlr_output_damage_swap_buffers
+    wlr_output_damage_attach_render, wlr_output_set_damage, wlr_output_commit
 };
 
 use crate::{area::Area, render::PixmanRegion};
@@ -72,7 +72,7 @@ impl Damage {
                 Some(region) => &mut region.region as *mut _,
                 None => ptr::null_mut()
             };
-            wlr_output_damage_make_current(self.damage, &mut res, damage);
+            wlr_output_damage_attach_render(self.damage, &mut res, damage);
             res
         }
     }
@@ -99,7 +99,9 @@ impl Damage {
                 Some(region) => &mut region.region as *mut _,
                 None => ptr::null_mut()
             };
-            wlr_output_damage_swap_buffers(self.damage, when_ptr, damage)
+
+            wlr_output_set_damage((*self.damage).output, damage);
+            wlr_output_commit((*self.damage).output)
         }
     }
 

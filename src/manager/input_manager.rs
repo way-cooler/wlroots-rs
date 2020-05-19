@@ -255,7 +255,7 @@ wayland_listener_static! {
                         let res = manager.switch_added.and_then(|f| f(compositor.clone(), switch_handle));
                         if let Some(switch_handler) = res {
                             let mut switch = SwitchWrapper::new((switch, switch_handler));
-                            let switch_ptr = &mut (*dev.dev_union().lid_switch);
+                            let switch_ptr = &mut (*dev.dev_union().switch_device);
                             wl_signal_add(&mut switch_ptr.events.toggle as *mut _ as _,
                                           switch.on_toggle_listener() as *mut _ as _);
                             wl_signal_add(&mut (*dev.as_ptr()).events.destroy as *mut _ as _,
