@@ -20,6 +20,7 @@ use wlroots::{
     surface,
     utils::{current_time, log::Logger, Handleable}
 };
+use wlroots::wlroots_sys::TransformOutput;
 
 struct State {
     xcursor_manager: xcursor::Manager,
