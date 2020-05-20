@@ -284,7 +284,7 @@ impl output::Handler for ExOutput {
     }
 }
 
-fn pointer_added(_: compositor::Handle, _: pointer::Handle) -> Option<Box<pointer::Handler>> {
+fn pointer_added(_: compositor::Handle, _: pointer::Handle) -> Option<Box<dyn pointer::Handler>> {
     Some(Box::new(ExPointer))
 }
 
@@ -292,7 +292,7 @@ fn pointer_added(_: compositor::Handle, _: pointer::Handle) -> Option<Box<pointe
 fn keyboard_added(
     compositor: compositor::Handle,
     keyboard: keyboard::Handle
-) -> Option<Box<keyboard::Handler>> {
+) -> Option<Box<dyn keyboard::Handler>> {
     {
         #[dehandle]
         let compositor = compositor;

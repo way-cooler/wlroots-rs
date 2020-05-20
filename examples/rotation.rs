@@ -115,7 +115,7 @@ impl output::Handler for ExOutput {
 fn keyboard_added(
     _compositor_handle: compositor::Handle,
     _keyboard_handle: keyboard::Handle
-) -> Option<Box<keyboard::Handler>> {
+) -> Option<Box<dyn keyboard::Handler>> {
     Some(Box::new(KeyboardManager))
 }
 

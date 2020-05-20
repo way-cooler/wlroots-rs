@@ -48,14 +48,14 @@ struct OutputEx;
 struct KeyboardEx;
 struct TabletEx;
 
-fn keyboard_added(_: compositor::Handle, _: keyboard::Handle) -> Option<Box<keyboard::Handler>> {
+fn keyboard_added(_: compositor::Handle, _: keyboard::Handle) -> Option<Box<dyn keyboard::Handler>> {
     Some(Box::new(KeyboardEx))
 }
 
 fn tablet_tool_added(
     compositor: compositor::Handle,
     tool: tablet_tool::Handle
-) -> Option<Box<tablet_tool::Handler>> {
+) -> Option<Box<dyn tablet_tool::Handler>> {
     with_handles!([(compositor: {compositor}), (tool: {tool})] => {
         let state: &mut State = compositor.downcast();
         state.size_mm = tool.input_device().size();
@@ -70,7 +70,7 @@ fn tablet_tool_added(
     Some(Box::new(TabletEx))
 }
 
-fn tablet_pad_added(_: compositor::Handle, _: tablet_pad::Handle) -> Option<Box<tablet_pad::Handler>> {
+fn tablet_pad_added(_: compositor::Handle, _: tablet_pad::Handle) -> Option<Box<dyn tablet_pad::Handler>> {
     Some(Box::new(TabletEx))
 }
 
