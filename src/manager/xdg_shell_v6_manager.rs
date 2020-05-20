@@ -14,7 +14,7 @@ use crate::{
     utils::Handleable
 };
 
-pub type NewSurfaceResult = (Option<Box<xdg_shell_v6::Handler>>, Option<Box<surface::Handler>>);
+pub type NewSurfaceResult = (Option<Box<dyn xdg_shell_v6::Handler>>, Option<Box<dyn surface::Handler>>);
 
 /// Callback that is triggered when a new XDG shell v6 surface appears.
 pub type NewSurface =

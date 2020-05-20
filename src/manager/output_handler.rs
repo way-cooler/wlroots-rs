@@ -37,7 +37,7 @@ pub trait Handler {
     fn destroyed(&mut self, compositor_handle: compositor::Handle, output_handle: output::Handle) {}
 }
 
-wayland_listener!(pub(crate) UserOutput, (Output, Box<Handler>), [
+wayland_listener!(pub(crate) UserOutput, (Output, Box<dyn Handler>), [
     on_destroy_listener => on_destroy_notify: |this: &mut UserOutput, data: *mut libc::c_void,|
     unsafe {
         let output_ptr = data as *mut wlr_output;

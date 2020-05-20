@@ -127,11 +127,11 @@ impl touch::Handler for TouchHandlerEx {
     }
 }
 
-fn touch_added(_: compositor::Handle, _: touch::Handle) -> Option<Box<touch::Handler>> {
+fn touch_added(_: compositor::Handle, _: touch::Handle) -> Option<Box<dyn touch::Handler>> {
     Some(Box::new(TouchHandlerEx))
 }
 
-fn keyboard_added(_: compositor::Handle, _: keyboard::Handle) -> Option<Box<keyboard::Handler>> {
+fn keyboard_added(_: compositor::Handle, _: keyboard::Handle) -> Option<Box<dyn keyboard::Handler>> {
     Some(Box::new(ExKeyboardHandler))
 }
 

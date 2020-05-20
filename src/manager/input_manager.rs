@@ -40,7 +40,7 @@ pub type InputAdded = fn(compositor_handle: compositor::Handle, device: &mut inp
 pub type KeyboardAdded = fn(
     compositor_handle: compositor::Handle,
     keyboard_handle: keyboard::Handle
-) -> Option<Box<keyboard::Handler>>;
+) -> Option<Box<dyn keyboard::Handler>>;
 
 /// Callback triggered when a pointer device is added.
 ///
@@ -49,14 +49,14 @@ pub type KeyboardAdded = fn(
 pub type PointerAdded = fn(
     compositor_handle: compositor::Handle,
     pointer_handle: pointer::Handle
-) -> Option<Box<pointer::Handler>>;
+) -> Option<Box<dyn pointer::Handler>>;
 
 /// Callback triggered when a touch device is added.
 ///
 /// # Panics
 /// Any panic in this function will cause the process to abort.
 pub type TouchAdded =
-    fn(compositor_handle: compositor::Handle, touch_handle: touch::Handle) -> Option<Box<touch::Handler>>;
+    fn(compositor_handle: compositor::Handle, touch_handle: touch::Handle) -> Option<Box<dyn touch::Handler>>;
 
 /// Callback triggered when a tablet tool is added.
 ///
@@ -66,7 +66,7 @@ pub type TouchAdded =
 pub type TabletToolAdded = fn(
     compositor_handle: compositor::Handle,
     tablet_tool_handle: tablet_tool::Handle
-) -> Option<Box<tablet_tool::Handler>>;
+) -> Option<Box<dyn tablet_tool::Handler>>;
 
 /// Callback triggered when a tablet pad is added.
 ///
@@ -76,10 +76,10 @@ pub type TabletToolAdded = fn(
 pub type TabletPadAdded = fn(
     compositor_handle: compositor::Handle,
     tablet_pad_handle: tablet_pad::Handle
-) -> Option<Box<tablet_pad::Handler>>;
+) -> Option<Box<dyn tablet_pad::Handler>>;
 
 pub type SwitchAdded =
-    fn(compositor_handle: compositor::Handle, switch_handle: switch::Handle) -> Option<Box<switch::Handler>>;
+    fn(compositor_handle: compositor::Handle, switch_handle: switch::Handle) -> Option<Box<dyn switch::Handler>>;
 
 wayland_listener_static! {
     static mut MANAGER;
@@ -233,11 +233,11 @@ wayland_listener_static! {
                                                                         tablet_pad_handler));
                             let pad_ptr = &mut (*dev.dev_union().tablet_pad);
                             wl_signal_add(&mut pad_ptr.events.button as *mut _ as _,
-                                          tablet_pad.button_listener() as *mut _ as _);;
+                                          tablet_pad.button_listener() as *mut _ as _);
                             wl_signal_add(&mut pad_ptr.events.ring as *mut _ as _,
-                                          tablet_pad.ring_listener() as *mut _ as _);;
+                                          tablet_pad.ring_listener() as *mut _ as _);
                             wl_signal_add(&mut pad_ptr.events.strip as *mut _ as _,
-                                          tablet_pad.strip_listener() as *mut _ as _);;
+                                          tablet_pad.strip_listener() as *mut _ as _);
                             wl_signal_add(&mut (*dev.as_ptr()).events.destroy as *mut _ as _,
                                           tablet_pad.on_destroy_listener() as _);
                             (*data).data = Box::into_raw(tablet_pad) as _;
@@ -255,7 +255,7 @@ wayland_listener_static! {
                         let res = manager.switch_added.and_then(|f| f(compositor.clone(), switch_handle));
                         if let Some(switch_handler) = res {
                             let mut switch = SwitchWrapper::new((switch, switch_handler));
-                            let switch_ptr = &mut (*dev.dev_union().lid_switch);
+                            let switch_ptr = &mut (*dev.dev_union().switch_device);
                             wl_signal_add(&mut switch_ptr.events.toggle as *mut _ as _,
                                           switch.on_toggle_listener() as *mut _ as _);
                             wl_signal_add(&mut (*dev.as_ptr()).events.destroy as *mut _ as _,

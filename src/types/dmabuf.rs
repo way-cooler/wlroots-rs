@@ -1,7 +1,6 @@
 //! Support for the DMABuf type
 
-use wlroots_sys::{wl_display, wlr_linux_dmabuf_v1, wlr_linux_dmabuf_v1_create, 
-                wlr_linux_dmabuf_v1_destroy};
+use wlroots_sys::{wl_display, wlr_linux_dmabuf_v1, wlr_linux_dmabuf_v1_create};
 use {crate::compositor::Compositor,
     crate::render::GenericRenderer};
 
@@ -28,11 +27,5 @@ impl Dmabuf {
                 None => None
             }
         }
-    }
-}
-
-impl Drop for Dmabuf {
-    fn drop(&mut self) {
-        unsafe { wlr_linux_dmabuf_v1_destroy(self.dmabuf) }
     }
 }

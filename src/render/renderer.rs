@@ -159,7 +159,7 @@ impl<'output> Renderer<'output> {
     where
         T: Into<Option<Area>>
     {
-        let mut area = area.into().map(|area| area.into());;
+        let mut area = area.into().map(|area| area.into());
         let area_ptr = area.as_mut().map(|area| area as _).unwrap_or(ptr::null_mut());
         unsafe { wlr_renderer_scissor(self.renderer, area_ptr) }
     }

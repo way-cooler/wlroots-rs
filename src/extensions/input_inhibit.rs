@@ -4,7 +4,7 @@
 
 use crate::wayland_sys::server::wl_display as wl_server_display;
 use wlroots_sys::{
-    wl_display, wlr_input_inhibit_manager, wlr_input_inhibit_manager_create, wlr_input_inhibit_manager_destroy
+    wl_display, wlr_input_inhibit_manager, wlr_input_inhibit_manager_create
 };
 
 #[derive(Debug)]
@@ -21,11 +21,5 @@ impl ZManagerV1 {
         } else {
             None
         }
-    }
-}
-
-impl Drop for ZManagerV1 {
-    fn drop(&mut self) {
-        unsafe { wlr_input_inhibit_manager_destroy(self.manager) }
     }
 }

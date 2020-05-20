@@ -25,7 +25,7 @@ pub trait Handler {
     fn destroyed(&mut self, compositor_handle: compositor::Handle, switch_handle: switch::Handle) {}
 }
 
-wayland_listener!(pub(crate) SwitchWrapper, (Switch, Box<Handler>), [
+wayland_listener!(pub(crate) SwitchWrapper, (Switch, Box<dyn Handler>), [
     on_destroy_listener => on_destroy_notify: |this: &mut SwitchWrapper, data: *mut libc::c_void,|
     unsafe {
         let input_device_ptr = data as *mut wlr_input_device;

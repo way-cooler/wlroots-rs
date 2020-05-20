@@ -202,7 +202,7 @@ impl Surface {
     where
         F: FnMut(surface::Handle, i32, i32)
     {
-        let mut iterator_ref: &mut FnMut(surface::Handle, i32, i32) = &mut iterator;
+        let mut iterator_ref: &mut dyn FnMut(surface::Handle, i32, i32) = &mut iterator;
         unsafe {
             unsafe extern "C" fn c_iterator(
                 wlr_surface: *mut wlr_surface,
@@ -210,7 +210,7 @@ impl Surface {
                 sy: i32,
                 data: *mut c_void
             ) {
-                let iterator_fn = &mut *(data as *mut &mut FnMut(surface::Handle, i32, i32));
+                let iterator_fn = &mut *(data as *mut &mut dyn FnMut(surface::Handle, i32, i32));
                 let surface = surface::Handle::from_ptr(wlr_surface);
                 iterator_fn(surface, sx, sy);
             }

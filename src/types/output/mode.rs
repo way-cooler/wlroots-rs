@@ -26,11 +26,6 @@ impl<'output> Mode<'output> {
         self.output_mode
     }
 
-    /// Gets the flags set on this Mode.
-    pub fn flags(&self) -> u32 {
-        unsafe { (*self.output_mode).flags }
-    }
-
     /// Gets the dimensions of this Mode.
     ///
     /// Returned value is (width, height)

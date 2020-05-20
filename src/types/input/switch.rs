@@ -43,7 +43,7 @@ impl Switch {
         use wlroots_sys::wlr_input_device_type::*;
         match (*device).type_ {
             WLR_INPUT_DEVICE_SWITCH => {
-                let switch = NonNull::new((*device).__bindgen_anon_1.lid_switch).expect(
+                let switch = NonNull::new((*device).__bindgen_anon_1.switch_device).expect(
                     "Switch pointer \
                      was null"
                 );

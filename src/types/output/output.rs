@@ -10,16 +10,9 @@ use std::{
     time::Duration
 };
 
-use crate::libc::{c_float, c_int, clock_t};
+use crate::libc::{c_float, c_int};
 use crate::wayland_sys::server::WAYLAND_SERVER_HANDLE;
-use wlroots_sys::{
-    timespec, wl_list, wl_output_subpixel, wl_output_transform, wlr_output, wlr_output_damage,
-    wlr_output_effective_resolution, wlr_output_enable, wlr_output_get_gamma_size, wlr_output_make_current,
-    wlr_output_mode, wlr_output_render_software_cursors, wlr_output_schedule_frame,
-    wlr_output_set_custom_mode, wlr_output_set_gamma, wlr_output_set_mode, wlr_output_set_position,
-    wlr_output_set_scale, wlr_output_set_transform, wlr_output_swap_buffers,
-    wlr_output_transformed_resolution
-};
+use wlroots_sys::{wl_list, wl_output_subpixel, wl_output_transform, wlr_output, wlr_output_damage, wlr_output_effective_resolution, wlr_output_enable, wlr_output_get_gamma_size, wlr_output_attach_render, wlr_output_mode, wlr_output_render_software_cursors, wlr_output_schedule_frame, wlr_output_set_custom_mode, wlr_output_set_gamma, wlr_output_set_mode, wlr_output_set_scale, wlr_output_set_transform, wlr_output_transformed_resolution, wlr_output_set_damage, wlr_output_commit, wlr_output_layout_get_box};
 
 pub use crate::manager::output_handler::*;
 pub(crate) use crate::manager::output_manager::Manager;
@@ -191,13 +184,13 @@ impl Output {
     // What will happen?
 
     /// Set this to be the current mode for the Output.
-    pub fn set_mode(&mut self, mode: output::Mode) -> bool {
-        unsafe { wlr_output_set_mode(self.output.as_ptr(), mode.as_ptr()) }
+    pub fn set_mode(&mut self, mode: output::Mode)  {
+        unsafe { wlr_output_set_mode(self.output.as_ptr(), mode.as_ptr()); }
     }
 
     /// Set a custom mode for this output.
-    pub fn set_custom_mode(&mut self, size: Size, refresh: i32) -> bool {
-        unsafe { wlr_output_set_custom_mode(self.output.as_ptr(), size.width, size.height, refresh) }
+    pub fn set_custom_mode(&mut self, size: Size, refresh: i32)  {
+        unsafe { wlr_output_set_custom_mode(self.output.as_ptr(), size.width, size.height, refresh); }
     }
 
     /// Gets the name of the output in UTF-8.
@@ -250,8 +243,8 @@ impl Output {
     }
 
     /// Determines if the output should have its buffers swapped or not.
-    pub fn needs_swap(&self) -> bool {
-        unsafe { (*self.output.as_ptr()).needs_swap }
+    pub fn needs_frame(&self) -> bool {
+        unsafe { (*self.output.as_ptr()).needs_frame }
     }
 
     /// Get the refresh rate of the output.
@@ -270,8 +263,28 @@ impl Output {
     }
 
     /// Gets the output position in layout space reported to clients.
-    pub fn layout_space_pos(&self) -> (i32, i32) {
-        unsafe { ((*self.output.as_ptr()).lx, (*self.output.as_ptr()).ly) }
+    pub fn layout_space_pos(&mut self) -> (i32, i32) {
+        unsafe {
+            let user_data = {
+                let user_data = self.user_data();
+                if user_data.is_null() {
+                    panic!("Cannot retrieve position: no user data exists");
+                }
+
+                Box::from_raw(user_data)
+            };
+
+            if let Some(layout) = user_data.layout_handle.map_or(None, |handle| handle.upgrade().ok()){
+
+                let layout_output_box = wlr_output_layout_get_box(layout.as_ptr(), self.as_ptr());
+
+                return ((*layout_output_box).x, (*layout_output_box).y);
+            }
+            else {
+                panic!("Cannot retrieve position: layout unavailable");
+            }
+
+        }
     }
 
     /// Get subpixel information about the output.
@@ -324,7 +337,7 @@ impl Output {
     /// or None if unknown. This is useful for damage tracking.
     pub unsafe fn make_current(&mut self) -> (bool, Option<c_int>) {
         let mut buffer_age = -1;
-        let res = wlr_output_make_current(self.output.as_ptr(), &mut buffer_age);
+        let res = wlr_output_attach_render(self.output.as_ptr(), &mut buffer_age);
         let buffer_age = if buffer_age == -1 { None } else { Some(buffer_age) };
         (res, buffer_age)
     }
@@ -345,23 +358,18 @@ impl Output {
     /// to do your own manual rendering in a compositor. In that case, call
     /// `make_current`, do your rendering, and then call this function.
     #[allow(clippy::cast_lossless)]
-    pub unsafe fn swap_buffers<'a, T, U>(&mut self, when: T, damage: U) -> bool
+    pub unsafe fn swap_buffers<'a, T, U>(&mut self, _when: T, damage: U) -> bool
     where
         T: Into<Option<Duration>>,
         U: Into<Option<&'a mut PixmanRegion>>
     {
-        let when = when.into().map(|duration| timespec {
-            tv_sec: duration.as_secs() as i64,
-            tv_nsec: duration.subsec_nanos() as clock_t
-        });
-        let when_ptr = when
-            .map(|mut duration| &mut duration as *mut _)
-            .unwrap_or_else(ptr::null_mut);
         let damage = match damage.into() {
             Some(region) => &mut region.region as *mut _,
             None => ptr::null_mut()
         };
-        wlr_output_swap_buffers(self.output.as_ptr(), when_ptr, damage)
+
+        wlr_output_set_damage(self.output.as_ptr(), damage);
+        wlr_output_commit(self.output.as_ptr())
     }
 
     /// Determines if a frame is pending or not.
@@ -426,8 +434,8 @@ impl Output {
     }
 
     /// Enables or disables an output.
-    pub fn enable(&mut self, enable: bool) -> bool {
-        unsafe { wlr_output_enable(self.output.as_ptr(), enable) }
+    pub fn enable(&mut self, enable: bool) {
+        unsafe { wlr_output_enable(self.output.as_ptr(), enable); }
     }
 
     /// Sets the gamma based on the size.
@@ -442,7 +450,27 @@ impl Output {
 
     /// Sets the position of this output.
     pub fn set_position(&mut self, origin: Origin) {
-        unsafe { wlr_output_set_position(self.output.as_ptr(), origin.x, origin.y) }
+        unsafe {
+            let user_data = {
+                let user_data = self.user_data();
+                if user_data.is_null() {
+                    panic!("Cannot set position: no user data exists");
+                }
+
+                Box::from_raw(user_data)
+            };
+
+            if let Some(layout) = user_data.layout_handle.map_or(None, |handle| handle.upgrade().ok()){
+
+                let layout_output_box = wlr_output_layout_get_box(layout.as_ptr(), self.as_ptr());
+
+                (*layout_output_box).x = origin.x;
+                (*layout_output_box).y = origin.y;
+            }
+            else{
+                panic!("Cannot set position: layout unavailable");
+            }
+        }
     }
 
     /// Set the scale applied to this output.

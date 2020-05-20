@@ -15,7 +15,7 @@ use std::{
 use crate::libc;
 use crate::wayland_sys::server::{signal::wl_signal_add, wl_display, wl_event_loop, WAYLAND_SERVER_HANDLE};
 use wlroots_sys::{
-    wlr_backend_destroy, wlr_backend_start, wlr_compositor, wlr_compositor_create, wlr_compositor_destroy,
+    wlr_backend_destroy, wlr_backend_start, wlr_compositor, wlr_compositor_create,
     wlr_xdg_shell, wlr_xdg_shell_create, wlr_xdg_shell_v6, wlr_xdg_shell_v6_create
 };
 
@@ -23,7 +23,7 @@ use crate::{
     backend::{self, Backend, Session, UnsafeRenderSetupFunction},
     data_device,
     extensions::{
-        gamma_control, gtk_primary_selection, idle, idle_inhibit, input_inhibit, screencopy, screenshooter,
+        gamma_control, gtk_primary_selection, idle, idle_inhibit, input_inhibit, screencopy,
         server_decoration
     },
     input, output,
@@ -93,7 +93,7 @@ pub struct Handle {
 #[allow(dead_code)]
 pub struct Compositor {
     /// User data.
-    pub data: Box<Any>,
+    pub data: Box<dyn Any>,
     /// Internal compositor handler
     compositor_handler: Option<&'static mut InternalCompositor>,
     /// Manager for the inputs.
@@ -137,8 +137,6 @@ pub struct Compositor {
     pub gtk_primary_selection_manager: Option<gtk_primary_selection::Manager>,
     /// Optional screencopy manager extension
     pub screencopy_manager: Option<screencopy::ZManagerV1>,
-    /// Optional screenshooter manager extension
-    pub screenshooter: Option<screenshooter::Screenshooter>,
     /// The renderer used to draw things to the screen.
     pub renderer: Option<GenericRenderer>,
     /// XWayland server, only Some if it is enabled
@@ -146,7 +144,7 @@ pub struct Compositor {
     /// The DnD manager
     data_device_manager: Option<data_device::Manager>,
     /// The error from the panic, if there was one.
-    panic_error: Option<Box<Any + Send>>,
+    panic_error: Option<Box<dyn Any + Send>>,
     /// Custom function to run at shutdown (or when a panic occurs).
     user_terminate: Option<fn()>,
     /// Lock used to borrow the compositor globally.
@@ -172,7 +170,6 @@ pub struct Builder {
     input_inhibit_manager: bool,
     gtk_primary_selection_manager: bool,
     screencopy_manager: bool,
-    screenshooter: bool,
     wayland_remote: Option<String>,
     x11_display: Option<String>,
     data_device_manager: bool,
@@ -306,13 +303,6 @@ impl Builder {
     /// extension.
     pub fn screencopy_manager(mut self, screencopy_manager: bool) -> Self {
         self.screencopy_manager = screencopy_manager;
-        self
-    }
-
-    /// Decide whether or not to enable the screenshooter protocol
-    /// extension.
-    pub fn screenshooter(mut self, screenshooter: bool) -> Self {
-        self.screenshooter = screenshooter;
         self
     }
 
@@ -518,11 +508,6 @@ impl Builder {
         } else {
             None
         };
-        let screenshooter = if self.screenshooter {
-            screenshooter::Screenshooter::new(display)
-        } else {
-            None
-        };
         let data_device_manager = if self.data_device_manager {
             data_device::Manager::new(display as _)
         } else {
@@ -634,7 +619,6 @@ impl Builder {
             input_inhibit_manager,
             gtk_primary_selection_manager,
             screencopy_manager,
-            screenshooter,
             renderer,
             xwayland,
             user_terminate,
@@ -752,7 +736,7 @@ impl Compositor {
 
     /// Saves the panic error information in the compositor, to be re-thrown
     /// later when we are out of the C callback stack.
-    pub(crate) fn save_panic_error(&mut self, error: Box<Any + Send>) {
+    pub(crate) fn save_panic_error(&mut self, error: Box<dyn Any + Send>) {
         self.panic_error = Some(error);
     }
 
@@ -775,7 +759,6 @@ impl Drop for Compositor {
                 "Builder was in improper state"
             );
             ffi_dispatch!(WAYLAND_SERVER_HANDLE, wl_display_destroy_clients, self.display);
-            wlr_compositor_destroy(self.compositor)
         }
     }
 }

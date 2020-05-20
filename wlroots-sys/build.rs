@@ -7,8 +7,14 @@ extern crate wayland_scanner;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::{env, fs, io};
+use bindgen::EnumVariation;
 
 fn main() {
+    println!("cargo:rerun-if-changed=src/gen.rs");
+    println!("cargo:rerun-if-changed=src/lib.rs");
+    println!("cargo:rerun-if-changed=src/wlroots.h");
+    println!("cargo:rerun-if-changed=wlroots");
+
     meson();
     let protocol_header_path =
         generate_protocol_headers().expect("Could not generate header files for wayland protocols");
@@ -18,15 +24,16 @@ fn main() {
         .derive_default(true)
         .generate_comments(true)
         .header("src/wlroots.h")
-        .whitelisted_type(r"^wlr_.*$")
-        .whitelisted_type(r"^xkb_.*$")
-        .whitelisted_type(r"^XKB_.*$")
-        .whitelisted_function(r"^_?pixman_.*$")
-        .whitelisted_function(r"^_?wlr_.*$")
-        .whitelisted_function(r"^xkb_.*$")
+        .whitelist_type(r"^wlr_.*$")
+        .whitelist_type(r"^xkb_.*$")
+        .whitelist_type(r"^XKB_.*$")
+        .whitelist_function(r"^_?pixman_.*$")
+        .whitelist_function(r"^_?wlr_.*$")
+        .whitelist_function(r"^xkb_.*$")
         .ctypes_prefix("libc")
         .clang_arg("-Iwlroots/include")
         .clang_arg("-Iwlroots/include/wlr")
+
         // NOTE Necessary because they use the out directory to put
         // pragma information on what features are available in a header file
         // titled "config.h"
@@ -35,21 +42,28 @@ fn main() {
         .clang_arg("-Iwlroots/include/xcursor")
         .clang_arg("-I/usr/include/pixman-1")
         // Work around bug https://github.com/rust-lang-nursery/rust-bindgen/issues/687
-        .hide_type("FP_NAN")
-        .hide_type("FP_INFINITE")
-        .hide_type("FP_ZERO")
-        .hide_type("FP_SUBNORMAL")
-        .hide_type("FP_NORMAL");
+        .blacklist_type("FP_NAN")
+        .blacklist_type("FP_INFINITE")
+        .blacklist_type("FP_ZERO")
+        .blacklist_type("FP_SUBNORMAL")
+        .blacklist_type("FP_NORMAL")
+        .default_enum_style(EnumVariation::Rust { non_exhaustive: false })
+        .enable_function_attribute_detection()
+        .enable_cxx_namespaces()
+        .size_t_is_usize(true);
+
     if cfg!(feature = "unstable") {
         builder = builder.clang_arg("-DWLR_USE_UNSTABLE");
     }
+
+    // config.h won't exist, so make a dummy file.
+    // We don't need it because of the following -D defines.
+    fs::create_dir_all(format!("{}{}", target_dir, "/include/wlr/"))
+        .expect("Could not create <out>/include/wlr");
+    fs::File::create(format!("{}{}", target_dir, "/include/wlr/config.h"))
+        .expect("Could not create dummy config.h file");
+
     if !cfg!(feature = "static") {
-        // config.h won't exist, so make a dummy file.
-        // We don't need it because of the following -D defines.
-        fs::create_dir_all(format!("{}{}", target_dir, "/include/wlr/"))
-            .expect("Could not create <out>/include/wlr");
-        fs::File::create(format!("{}{}", target_dir, "/include/wlr/config.h"))
-            .expect("Could not create dummy config.h file");
         // meson automatically sets up variables, but if we are linking
         // dynamically bindgen will no longer have them.
         builder = builder.clang_args(
@@ -65,6 +79,7 @@ fn main() {
             .iter()
         )
     }
+    
     let generated = builder.generate().unwrap();
 
     println!("cargo:rustc-link-lib=dylib=X11");
@@ -109,39 +124,48 @@ fn meson() {}
 
 #[cfg(feature = "static")]
 fn meson() {
-    let build_path = PathBuf::from(env::var("OUT_DIR").expect("Could not get OUT_DIR env variable"));
-    build_path.join("build");
+    if !Path::new("wlroots").exists(){
+        panic!("The `wlroots` submodule does not exist");
+    }
+
+    let build_path = PathBuf::from(env::var("OUT_DIR")
+        .expect("Could not get OUT_DIR env variable"))
+        .join("build");
+
     let build_path_str = build_path
         .to_str()
         .expect("Could not turn build path into a string");
+    
     println!("cargo:rustc-link-search=native=wlroots");
     println!("cargo:rustc-link-search=native={}/lib", build_path_str);
     println!("cargo:rustc-link-search=native={}/lib64", build_path_str);
     println!("cargo:rustc-link-search=native={}/build/", build_path_str);
-    if cfg!(feature = "static") {
-        println!("cargo:rustc-link-search=native={}/util/", build_path_str);
-        println!("cargo:rustc-link-search=native={}/types/", build_path_str);
-        println!("cargo:rustc-link-search=native={}/protocol/", build_path_str);
-        println!("cargo:rustc-link-search=native={}/xcursor/", build_path_str);
-        println!("cargo:rustc-link-search=native={}/xwayland/", build_path_str);
-        println!("cargo:rustc-link-search=native={}/backend/", build_path_str);
-        println!("cargo:rustc-link-search=native={}/backend/x11", build_path_str);
-        println!("cargo:rustc-link-search=native={}/render/", build_path_str);
 
-        println!("cargo:rustc-link-lib=static=wlr_util");
-        println!("cargo:rustc-link-lib=static=wlr_types");
-        println!("cargo:rustc-link-lib=static=wlr_xcursor");
-        println!("cargo:rustc-link-lib=static=wlr_xwayland");
-        println!("cargo:rustc-link-lib=static=wlr_backend");
-        println!("cargo:rustc-link-lib=static=wlr_backend_x11");
-        println!("cargo:rustc-link-lib=static=wlr_render");
-        println!("cargo:rustc-link-lib=static=wl_protos");
+    let mut meson_config_status = None;
+
+    if cfg!(feature = "static") {
+        println!("cargo:rustc-link-lib=static=wlroots");
+        println!("cargo:rustc-link-search=native={}/", build_path_str);
+
+        meson_config_status = Some(
+            Command::new("meson")
+                .current_dir("wlroots")
+                .arg(".")
+                .arg(build_path_str)
+                .arg("-Ddefault_library=static")
+                .spawn()
+                .expect("Static compilation failed: Is meson installed?")
+                .wait()
+        );
     }
 
-    if Path::new("wlroots").exists() {
-        meson::build("wlroots", build_path_str);
-    } else {
-        panic!("The `wlroots` submodule does not exist");
+    match meson_config_status
+    {
+        None | Some(Ok(_)) => meson::build("wlroots", build_path_str),
+        Some(Err(exit_status)) => println!(
+            "Static compilation failed: Meson configuration failed with {}",
+            exit_status
+        )
     }
 }
 
@@ -192,24 +216,24 @@ fn generate_protocols() {
             "gamma_control"
         ),
         ("./wlroots/protocol/wlr-screencopy-unstable-v1.xml", "screencopy"),
-        ("./wlroots/protocol/screenshooter.xml", "screenshooter"),
         ("./wlroots/protocol/idle.xml", "idle")
     ];
 
     for protocol in protocols {
-        wayland_scanner::generate_c_code(
+        wayland_scanner::generate_code(
             protocol.0,
             output_dir.join(format!("{}_server_api.rs", protocol.1)),
             wayland_scanner::Side::Server
         );
-        wayland_scanner::generate_c_code(
+        wayland_scanner::generate_code(
             protocol.0,
             output_dir.join(format!("{}_client_api.rs", protocol.1)),
             wayland_scanner::Side::Client
         );
-        wayland_scanner::generate_c_interfaces(
+        wayland_scanner::generate_code(
             protocol.0,
-            output_dir.join(format!("{}_interfaces.rs", protocol.1))
+            output_dir.join(format!("{}_interfaces.rs", protocol.1)),
+            wayland_scanner::Side::Server
         );
     }
 }

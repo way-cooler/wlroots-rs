@@ -131,7 +131,7 @@ pub trait Handler {
     }
 }
 
-wayland_listener!(pub(crate) XdgShellV6, (xdg_shell_v6::Surface, Option<Box<Handler>>), [
+wayland_listener!(pub(crate) XdgShellV6, (xdg_shell_v6::Surface, Option<Box<dyn Handler>>), [
     destroy_listener => destroy_notify: |this: &mut XdgShellV6, data: *mut libc::c_void,| unsafe {
         let (ref mut shell_surface, ref mut manager) = match &mut this.data {
             (_, None) => return,

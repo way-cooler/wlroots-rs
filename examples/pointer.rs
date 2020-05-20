@@ -185,7 +185,7 @@ impl output::Handler for ExOutput {
 fn pointer_added(
     compositor_handle: compositor::Handle,
     pointer_handle: pointer::Handle
-) -> Option<Box<pointer::Handler>> {
+) -> Option<Box<dyn pointer::Handler>> {
     with_handles!([(compositor: {compositor_handle}), (pointer: {pointer_handle})] => {
         let compositor_state: &mut CompositorState = compositor.downcast();
         compositor_state.cursor_handle
@@ -199,7 +199,7 @@ fn pointer_added(
 fn keyboard_added(
     _compositor_handle: compositor::Handle,
     _keyboard_handle: keyboard::Handle
-) -> Option<Box<keyboard::Handler>> {
+) -> Option<Box<dyn keyboard::Handler>> {
     Some(Box::new(ExKeyboardHandler))
 }
 

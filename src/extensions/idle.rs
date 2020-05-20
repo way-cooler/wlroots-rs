@@ -4,7 +4,7 @@ use crate::seat::Seat;
 
 use crate::wayland_sys::server::wl_display as wl_server_display;
 use wlroots_sys::{
-    wl_display, wlr_idle, wlr_idle_create, wlr_idle_destroy, wlr_idle_notify_activity, wlr_idle_set_enabled
+    wl_display, wlr_idle, wlr_idle_create, wlr_idle_notify_activity, wlr_idle_set_enabled
 };
 
 #[derive(Debug)]
@@ -31,11 +31,5 @@ impl Manager {
     /// If we are passed a null pointer, update timers for all seats.
     pub fn set_enabled(&mut self, seat: &Seat, enabled: bool) {
         unsafe { wlr_idle_set_enabled(self.manager, seat.as_ptr(), enabled) }
-    }
-}
-
-impl Drop for Manager {
-    fn drop(&mut self) {
-        unsafe { wlr_idle_destroy(self.manager) }
     }
 }
