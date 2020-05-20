@@ -10,7 +10,7 @@ use std::{env, fs, io};
 use bindgen::EnumVariation;
 
 fn main() {
-
+    println!("cargo:rerun-if-changed=src/gen.rs");
     println!("cargo:rerun-if-changed=src/lib.rs");
     println!("cargo:rerun-if-changed=src/wlroots.h");
     println!("cargo:rerun-if-changed=wlroots");
