@@ -40,7 +40,7 @@ pub trait Handler {
         compositor_hadle: compositor::Handle,
         surface_handle: Handle,
         subsurface_handle: subsurface::Handle
-    ) -> Option<Box<subsurface::Handler>> {
+    ) -> Option<Box<dyn subsurface::Handler>> {
         None
     }
 
@@ -49,7 +49,7 @@ pub trait Handler {
 
 impl Handler for () {}
 
-wayland_listener!(pub(crate) InternalSurface, (Surface, Box<Handler>), [
+wayland_listener!(pub(crate) InternalSurface, (Surface, Box<dyn Handler>), [
     on_commit_listener => on_commit_notify: |this: &mut InternalSurface, _data: *mut libc::c_void,|
     unsafe {
         let (ref mut surface, ref mut manager) = this.data;
@@ -97,7 +97,7 @@ wayland_listener!(pub(crate) InternalSurface, (Surface, Box<Handler>), [
 ]);
 
 impl InternalSurface {
-    pub(crate) unsafe fn data(&mut self) -> &mut (Surface, Box<Handler>) {
+    pub(crate) unsafe fn data(&mut self) -> &mut (Surface, Box<dyn Handler>) {
         &mut self.data
     }
 }

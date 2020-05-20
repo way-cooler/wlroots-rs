@@ -93,7 +93,7 @@ pub struct Handle {
 #[allow(dead_code)]
 pub struct Compositor {
     /// User data.
-    pub data: Box<Any>,
+    pub data: Box<dyn Any>,
     /// Internal compositor handler
     compositor_handler: Option<&'static mut InternalCompositor>,
     /// Manager for the inputs.
@@ -144,7 +144,7 @@ pub struct Compositor {
     /// The DnD manager
     data_device_manager: Option<data_device::Manager>,
     /// The error from the panic, if there was one.
-    panic_error: Option<Box<Any + Send>>,
+    panic_error: Option<Box<dyn Any + Send>>,
     /// Custom function to run at shutdown (or when a panic occurs).
     user_terminate: Option<fn()>,
     /// Lock used to borrow the compositor globally.
@@ -736,7 +736,7 @@ impl Compositor {
 
     /// Saves the panic error information in the compositor, to be re-thrown
     /// later when we are out of the C callback stack.
-    pub(crate) fn save_panic_error(&mut self, error: Box<Any + Send>) {
+    pub(crate) fn save_panic_error(&mut self, error: Box<dyn Any + Send>) {
         self.panic_error = Some(error);
     }
 

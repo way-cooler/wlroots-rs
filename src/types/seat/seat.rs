@@ -122,7 +122,7 @@ pub trait Handler {
     fn destroy(&mut self, compositor_handle: compositor::Handle, seat_handle: Handle) {}
 }
 
-wayland_listener!(pub Seat, (*mut wlr_seat, Box<Handler>), [
+wayland_listener!(pub Seat, (*mut wlr_seat, Box<dyn Handler>), [
     pointer_grab_begin_listener => pointer_grab_begin_notify: |this: &mut Seat,
                                                                event: *mut libc::c_void,|
     unsafe {
@@ -290,7 +290,7 @@ wayland_listener!(pub Seat, (*mut wlr_seat, Box<Handler>), [
 
 impl Seat {
     /// Allocates a new `wlr_seat` and adds a wl_seat global to the display.
-    pub fn create(compositor: &mut Compositor, name: String, handler: Box<Handler>) -> Handle {
+    pub fn create(compositor: &mut Compositor, name: String, handler: Box<dyn Handler>) -> Handle {
         unsafe {
             let name = safe_as_cstring(name);
             let seat = wlr_seat_create(compositor.display as _, name.as_ptr());

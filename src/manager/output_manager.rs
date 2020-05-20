@@ -23,7 +23,7 @@ pub struct OutputBuilder<'output> {
 /// the output::Handler instance.
 pub struct BuilderResult<'output> {
     pub output: output::Handle,
-    result: Box<output::Handler>,
+    result: Box<dyn output::Handler>,
     phantom: PhantomData<&'output Output>
 }
 

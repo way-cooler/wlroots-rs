@@ -23,7 +23,7 @@ impl PixmanRegion32 {
         unsafe {
             // NOTE This is safe because the init function properly
             // sets up the fields.
-            let mut region: pixman_region32_t = mem::uninitialized();
+            let mut region: pixman_region32_t = mem::MaybeUninit::uninit().assume_init();
             pixman_region32_init(&mut region);
             PixmanRegion32 { region }
         }

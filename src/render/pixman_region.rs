@@ -17,7 +17,7 @@ impl PixmanRegion {
         unsafe {
             // NOTE Rational for uninitialized memory:
             // We are automatically filling it in with pixman_region32_init.
-            let mut region = mem::uninitialized();
+            let mut region = mem::MaybeUninit::uninit().assume_init();
             pixman_region32_init(&mut region);
             PixmanRegion { region }
         }

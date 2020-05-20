@@ -54,7 +54,7 @@ pub trait Handler {
     fn destroyed(&mut self, compositor_handle: compositor::Handle, tablet_tool_handle: tablet_tool::Handle) {}
 }
 
-wayland_listener!(pub(crate) TabletToolWrapper, (TabletTool, Box<Handler>), [
+wayland_listener!(pub(crate) TabletToolWrapper, (TabletTool, Box<dyn Handler>), [
     on_destroy_listener => on_destroy_notify: |this: &mut TabletToolWrapper, data: *mut libc::c_void,|
     unsafe {
         let input_device_ptr = data as *mut wlr_input_device;

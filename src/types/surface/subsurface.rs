@@ -24,7 +24,7 @@ pub trait Handler {
     }
 }
 
-wayland_listener!(pub(crate) InternalSubsurface, (Subsurface, Box<Handler>), [
+wayland_listener!(pub(crate) InternalSubsurface, (Subsurface, Box<dyn Handler>), [
     on_destroy_listener => on_destroy_notify: |this: &mut InternalSubsurface,
                                                data: *mut libc::c_void,|
     unsafe {

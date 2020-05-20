@@ -23,7 +23,7 @@ pub type OnReady = fn(compositor::Handle);
 pub type NewSurface = fn(
     compositor_handle: compositor::Handle,
     xwayland_surface: xwayland::surface::Handle
-) -> Option<Box<xwayland::surface::Handler>>;
+) -> Option<Box<dyn xwayland::surface::Handler>>;
 
 wayland_listener_static! {
     static mut MANAGER;

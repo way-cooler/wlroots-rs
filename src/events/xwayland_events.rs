@@ -1,4 +1,3 @@
-use crate::libc::{int16_t, uint16_t};
 use wlroots_sys::{wlr_xwayland_move_event, wlr_xwayland_resize_event, wlr_xwayland_surface_configure_event};
 
 use crate::{utils::edges::Edges, xwayland};
@@ -37,14 +36,14 @@ impl Configure {
     /// Get the coordinates for where the XWayland surface wants to be.
     ///
     /// Return format is (x, y).
-    pub fn coords(&self) -> (int16_t, int16_t) {
+    pub fn coords(&self) -> (i16, i16) {
         unsafe { ((*self.event).x, (*self.event).y) }
     }
 
     /// Get the dimensions the XWayland surface wants to have.
     ///
     /// Return format is (width, height).
-    pub fn dimensions(&self) -> (uint16_t, uint16_t) {
+    pub fn dimensions(&self) -> (u16, u16) {
         unsafe { ((*self.event).width, (*self.event).height) }
     }
 }

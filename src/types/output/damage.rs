@@ -1,8 +1,7 @@
 use std::{ptr, time::Duration};
 
-use crate::libc::clock_t;
 use wlroots_sys::{
-    timespec, wlr_output, wlr_output_damage, wlr_output_damage_add, wlr_output_damage_add_box,
+    wlr_output, wlr_output_damage, wlr_output_damage_add, wlr_output_damage_add_box,
     wlr_output_damage_add_whole, wlr_output_damage_create, wlr_output_damage_destroy,
     wlr_output_damage_attach_render, wlr_output_set_damage, wlr_output_commit
 };
@@ -82,19 +81,12 @@ impl Damage {
     /// If the time of the frame isn't known, set `when` to `None`.
     ///
     /// Swapping buffers schedules a `frame` event.
-    pub fn swap_buffers<'a, T, U>(&mut self, when: T, damage: U) -> bool
+    pub fn swap_buffers<'a, T, U>(&mut self, _when: T, damage: U) -> bool
     where
         T: Into<Option<Duration>>,
         U: Into<Option<&'a mut PixmanRegion>>
     {
         unsafe {
-            let when = when.into().map(|duration| timespec {
-                tv_sec: duration.as_secs() as clock_t,
-                tv_nsec: clock_t::from(duration.subsec_nanos())
-            });
-            let when_ptr = when
-                .map(|mut duration| &mut duration as *mut _)
-                .unwrap_or_else(ptr::null_mut);
             let damage = match damage.into() {
                 Some(region) => &mut region.region as *mut _,
                 None => ptr::null_mut()

@@ -125,7 +125,7 @@ pub trait Handler {
     }
 }
 
-wayland_listener!(pub(crate) XdgShell, (xdg_shell::Surface, Option<Box<Handler>>), [
+wayland_listener!(pub(crate) XdgShell, (xdg_shell::Surface, Option<Box<dyn Handler>>), [
     destroy_listener => destroy_notify: |this: &mut XdgShell, data: *mut libc::c_void,| unsafe {
         let (ref shell_surface, ref mut manager) = this.data;
         let compositor = match compositor::handle() {

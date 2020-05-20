@@ -34,7 +34,7 @@ pub trait Handler {
     fn destroyed(&mut self, compositor_handle: compositor::Handle, keyboard_handle: keyboard::Handle) {}
 }
 
-wayland_listener!(pub(crate) KeyboardWrapper, (Keyboard, Box<Handler>), [
+wayland_listener!(pub(crate) KeyboardWrapper, (Keyboard, Box<dyn Handler>), [
     on_destroy_listener => on_destroy_notify: |this: &mut KeyboardWrapper, data: *mut libc::c_void,|
     unsafe {
         let input_device_ptr = data as *mut wlr_input_device;

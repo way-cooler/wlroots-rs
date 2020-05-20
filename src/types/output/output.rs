@@ -10,9 +10,9 @@ use std::{
     time::Duration
 };
 
-use crate::libc::{c_float, c_int, clock_t};
+use crate::libc::{c_float, c_int};
 use crate::wayland_sys::server::WAYLAND_SERVER_HANDLE;
-use wlroots_sys::{timespec, wl_list, wl_output_subpixel, wl_output_transform, wlr_output, wlr_output_damage, wlr_output_effective_resolution, wlr_output_enable, wlr_output_get_gamma_size, wlr_output_attach_render, wlr_output_mode, wlr_output_render_software_cursors, wlr_output_schedule_frame, wlr_output_set_custom_mode, wlr_output_set_gamma, wlr_output_set_mode, wlr_output_set_scale, wlr_output_set_transform, wlr_output_transformed_resolution, wlr_xdg_output_manager_v1, wlr_output_layout_get, wlr_output_set_damage, wlr_output_commit, wlr_output_layout_get_box};
+use wlroots_sys::{wl_list, wl_output_subpixel, wl_output_transform, wlr_output, wlr_output_damage, wlr_output_effective_resolution, wlr_output_enable, wlr_output_get_gamma_size, wlr_output_attach_render, wlr_output_mode, wlr_output_render_software_cursors, wlr_output_schedule_frame, wlr_output_set_custom_mode, wlr_output_set_gamma, wlr_output_set_mode, wlr_output_set_scale, wlr_output_set_transform, wlr_output_transformed_resolution, wlr_output_set_damage, wlr_output_commit, wlr_output_layout_get_box};
 
 pub use crate::manager::output_handler::*;
 pub(crate) use crate::manager::output_manager::Manager;
@@ -265,7 +265,7 @@ impl Output {
     /// Gets the output position in layout space reported to clients.
     pub fn layout_space_pos(&mut self) -> (i32, i32) {
         unsafe {
-            let mut user_data = {
+            let user_data = {
                 let user_data = self.user_data();
                 if user_data.is_null() {
                     panic!("Cannot retrieve position: no user data exists");
@@ -358,18 +358,11 @@ impl Output {
     /// to do your own manual rendering in a compositor. In that case, call
     /// `make_current`, do your rendering, and then call this function.
     #[allow(clippy::cast_lossless)]
-    pub unsafe fn swap_buffers<'a, T, U>(&mut self, when: T, damage: U) -> bool
+    pub unsafe fn swap_buffers<'a, T, U>(&mut self, _when: T, damage: U) -> bool
     where
         T: Into<Option<Duration>>,
         U: Into<Option<&'a mut PixmanRegion>>
     {
-        let when = when.into().map(|duration| timespec {
-            tv_sec: duration.as_secs() as i64,
-            tv_nsec: duration.subsec_nanos() as clock_t
-        });
-        let when_ptr = when
-            .map(|mut duration| &mut duration as *mut _)
-            .unwrap_or_else(ptr::null_mut);
         let damage = match damage.into() {
             Some(region) => &mut region.region as *mut _,
             None => ptr::null_mut()
@@ -458,7 +451,7 @@ impl Output {
     /// Sets the position of this output.
     pub fn set_position(&mut self, origin: Origin) {
         unsafe {
-            let mut user_data = {
+            let user_data = {
                 let user_data = self.user_data();
                 if user_data.is_null() {
                     panic!("Cannot set position: no user data exists");

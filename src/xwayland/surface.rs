@@ -4,7 +4,7 @@ use std::{
     rc::{Rc, Weak}
 };
 
-use crate::libc::{self, int16_t, size_t, uint16_t};
+use crate::libc::{self, size_t};
 
 use crate::wayland_sys::server::WAYLAND_SERVER_HANDLE;
 use wlroots_sys::{
@@ -87,7 +87,7 @@ pub trait Handler {
         compositor_handle: compositor::Handle,
         surface_handle: Option<surface::Handle>,
         xwayland_surface_handle: Handle
-    ) -> Option<Box<surface::Handler>> {
+    ) -> Option<Box<dyn surface::Handler>> {
         None
     }
 
@@ -156,7 +156,7 @@ pub trait Handler {
     }
 }
 
-wayland_listener!(pub(crate) Shell, (Surface, Option<Box<Handler>>), [
+wayland_listener!(pub(crate) Shell, (Surface, Option<Box<dyn Handler>>), [
     destroy_listener => destroy_notify: |this: &mut Shell, data: *mut libc::c_void,|
     unsafe {
         let (ref mut shell_surface, ref mut manager) = match &mut this.data {
@@ -456,14 +456,14 @@ impl Surface {
     /// Get the coordinates of the window.
     ///
     /// Return format is (x, y)
-    pub fn coords(&self) -> (int16_t, int16_t) {
+    pub fn coords(&self) -> (i16, i16) {
         unsafe { ((*self.shell_surface.as_ptr()).x, (*self.shell_surface.as_ptr()).y) }
     }
 
     /// Get the dimensions the XWayland surface.
     ///
     /// Return format is (width, height).
-    pub fn dimensions(&self) -> (uint16_t, uint16_t) {
+    pub fn dimensions(&self) -> (u16, u16) {
         unsafe {
             (
                 (*self.shell_surface.as_ptr()).width,
@@ -475,7 +475,7 @@ impl Surface {
     /// TODO What does this represent?
     ///
     /// Return format is (width, height)
-    pub fn saved_dimensions(&self) -> (uint16_t, uint16_t) {
+    pub fn saved_dimensions(&self) -> (u16, u16) {
         unsafe {
             (
                 (*self.shell_surface.as_ptr()).saved_width,

@@ -66,7 +66,7 @@ pub trait Handler {
     }
 }
 
-wayland_listener!(pub Layout, (*mut wlr_output_layout, Box<Handler>), [
+wayland_listener!(pub Layout, (*mut wlr_output_layout, Box<dyn Handler>), [
     output_add_listener => output_add_notify: |this: &mut Layout, data: *mut libc::c_void,|
     unsafe {
         let (output_ptr, ref mut manager) = this.data;
@@ -151,7 +151,7 @@ pub struct Output<'output> {
 
 impl Layout {
     /// Construct a new OuputLayout.
-    pub fn create(handler: Box<Handler>) -> Handle {
+    pub fn create(handler: Box<dyn Handler>) -> Handle {
         unsafe {
             let layout = wlr_output_layout_create();
             if layout.is_null() {

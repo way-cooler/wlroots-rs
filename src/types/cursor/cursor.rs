@@ -148,7 +148,7 @@ pub trait Handler {
     }
 }
 
-wayland_listener!(pub Cursor, (*mut wlr_cursor, Box<Handler>, Option<output::layout::Handle>), [
+wayland_listener!(pub Cursor, (*mut wlr_cursor, Box<dyn Handler>, Option<output::layout::Handle>), [
     pointer_motion_listener => pointer_motion_notify: |this: &mut Cursor, event: *mut libc::c_void,|
     unsafe {
         let (cursor_ptr, ref mut cursor_handler, _) = this.data;
@@ -355,7 +355,7 @@ impl fmt::Debug for Cursor {
 }
 
 impl Cursor {
-    pub fn create(cursor_handler: Box<Handler>) -> Handle {
+    pub fn create(cursor_handler: Box<dyn Handler>) -> Handle {
         unsafe {
             let cursor_ptr = wlr_cursor_create();
             if cursor_ptr.is_null() {
